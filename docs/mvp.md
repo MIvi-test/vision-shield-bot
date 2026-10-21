@@ -30,13 +30,13 @@ MVP — обязательная часть постановки ([assignment.md
 
 ```mermaid
 flowchart LR
-    EMU_IN["Эмулятор MAX · Dev2<br/>фото пользователя"]
+    EMU_IN["Эмулятор MAX · Dev1<br/>фото пользователя"]
     FETCH["Fetcher · Dev2<br/>скачивание без декодирования,<br/>лимит размера, SHA-256"]
     QUAR[("MinIO<br/>quarantine/")]
     SAN[("MinIO<br/>sanitized/")]
     UI["Панель · Dev4<br/>превью для модератора"]
     PUB["Publisher · Dev2"]
-    EMU_CH["Эмулятор MAX · Dev2<br/>пост в канале"]
+    EMU_CH["Эмулятор MAX · Dev1<br/>пост в канале"]
 
     subgraph ISO["Изоляция — сеть processing, internal: true"]
         MEDIA["Media worker · Dev2<br/>формат и лимиты,<br/>перекодирование, без EXIF"]
@@ -70,7 +70,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    EMU_IN["Эмулятор MAX · Dev2<br/>сообщения пользователя"]
+    EMU_IN["Эмулятор MAX · Dev1<br/>сообщения пользователя"]
     UI["Панель модератора · Dev4"]
 
     API["API + входной адаптер · Dev2<br/>диалог, согласие, заявки, решения"]
@@ -84,7 +84,7 @@ flowchart TB
     PUB["Publisher / notifier · Dev2<br/>все исходящие сообщения"]
     WORK["Media worker · Dev2<br/>CV worker · Dev3"]
 
-    EMU_OUT["Эмулятор MAX · Dev2<br/>посты, уведомления"]
+    EMU_OUT["Эмулятор MAX · Dev1<br/>посты, уведомления"]
 
     EMU_IN -- события бота --> API
     UI <-- заявки, решения --> API
@@ -124,7 +124,7 @@ flowchart TB
 %%{init: {"sequence": {"mirrorActors": false, "actorMargin": 40, "boxMargin": 8, "noteMargin": 8, "messageMargin": 34}}}%%
 sequenceDiagram
     autonumber
-    participant E as Эмулятор MAX<br/>Dev2
+    participant E as Эмулятор MAX<br/>Dev1
     participant A as API<br/>Dev2
     participant F as Fetcher<br/>Dev2
     participant C as Consumer<br/>Dev2
@@ -218,7 +218,7 @@ sequenceDiagram
     participant Q as RabbitMQ
     participant S as MinIO
     participant P as Publisher / notifier<br/>Dev2
-    participant E as Эмулятор MAX<br/>Dev2
+    participant E as Эмулятор MAX<br/>Dev1
 
     opt заявка одобрена
         rect rgba(61, 154, 91, 0.16)
