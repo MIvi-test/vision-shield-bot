@@ -105,7 +105,8 @@ Backend API, consumer, dispatcher, fetcher и publisher используют о�
 Каталоги появляются по мере работы, а не заранее.
 
 ```text
-apps/backend/              # API, домен, consumer, outbox, fetcher, MAX, модерация, розыгрыш
+apps/backend/              # API, домен, consumer, outbox, fetcher, MAX-адаптер, модерация, розыгрыш
+apps/max-emulator/         # Dev1: имитация API MAX, сообщений и канала
 apps/media-worker/         # проверка и очистка файлов
 apps/cv-worker/            # модель и обработчик
 apps/moderator-ui/         # React
