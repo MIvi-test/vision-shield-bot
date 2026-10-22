@@ -28,7 +28,7 @@
 
 | ID | Задача | Кто | Готово, когда |
 | --- | --- | --- | --- |
-| S1-01 | Репозиторий: структура `apps/`, `packages/`, `infra/` ([ARCHITECTURE.md](ARCHITECTURE.md) §4), `.gitignore` с `.env`, `.env.example`, `CODEOWNERS` по [team.md](team.md), шаблон PR, защита `main` | Dev1 | Изменения попадают в `main` только через PR с ревью |
+| S1-01 | Репозиторий: структура `apps/`, `packages/`, `infra/` ([ARCHITECTURE.md](ARCHITECTURE.md) §4), `.gitignore` с `.env`, `.env.example`, шаблон PR, защита `main`; решение о CODEOWNERS отложено | Dev1 | Изменения попадают в `main` только через PR с ревью |
 | S1-02 | CI v0: Ruff, pytest, сборка фронтенда, поиск секретов | Dev1 | CI запускается на каждый PR и блокирует merge при ошибке |
 | S1-03 | Compose v0: backend, PostgreSQL, эмулятор, панель; раздел «Запуск» в README | Dev1 | Проект поднимается по README на чистой машине |
 | S1-04 | Тестовые боты и канал; проверка MAX на тестовом боте: формат и скачивание вложений, публикация, удаление, `GET /messages`, кнопки и `message_callback`, реакции | Dev1 | Протокол в `docs/results/max-check.md`, обезличенные ответы API в `packages/contracts/max/`, [contracts.md](contracts.md) §4 и [risks.md](risks.md) обновлены |
