@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service currently contains documentation and scaffolding; application code, dependency manifests, tests, Compose, and CI are not implemented yet.
+This MAX photo moderation service currently contains documentation, scaffolding, and Gitleaks CI; application code, dependency manifests, tests, and Compose are not implemented yet.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.
@@ -17,6 +17,7 @@ Create directories as implementation begins.
 - `cp .env.example .env`: prepare local configuration; fill credentials locally.
 - `git diff --check`: check whitespace before submitting changes.
 - `git status --short`: inspect changed and untracked files.
+- `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
 There is no working build or service launch command yet. Compose arrives in S1-03. Once Python tooling is configured, use `ruff check .`, `ruff format --check .`, and `pytest`. Document actual frontend commands when its package manifest exists.
 
@@ -32,7 +33,7 @@ Use pytest for Python and contract tests; Vitest is planned for the frontend. Na
 
 History contains Russian and English summaries, including `docs: add architecture, MVP and sprint plan`; no strict commit convention is established. Use concise, descriptive messages and task branches such as `s1-05-max-emulator`.
 
-Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval. CODEOWNERS is deferred. Branch protection requires separate GitHub configuration; CI is planned in S1-02.
+Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks runs on push and PR; making it a required check needs separate GitHub configuration. Other CI checks remain in S1-02.
 
 ## Security & Architecture Boundaries
 
