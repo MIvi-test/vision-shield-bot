@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install uv
+        run: python -m pip install uv==0.13.5
+
+      - name: Install locked dependencies
+        run: uv sync --locked
+
+      - name: Ruff lint
+        run: uv run --no-sync ruff check .
+
+      - name: Ruff format
+        run: uv run --no-sync ruff format --check .
+
+      - name: pytest
+        if: ${{ hashFiles('**/test_*.py', '**/*_test.py', '!**/.venv/**', '!**/venv/**', '!**/node_modules/**') != '' }}
+        run: uv run --no-sync pytest
+
+      - name: Report missing tests
+        if: ${{ hashFiles('**/test_*.py', '**/*_test.py', '!**/.venv/**', '!**/venv/**', '!**/node_modules/**') == '' }}
+        run: echo 'Tests are not implemented yet; pytest was skipped.' >> "$GITHUB_STEP_SUMMARY"
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install frontend dependencies
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        working-directory: apps/moderator-ui
+        run: npm ci
+
+      - name: Build frontend
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        working-directory: apps/moderator-ui
+        run: npm run build
+
+      - name: Report missing frontend
+        if: ${{ hashFiles('apps/moderator-ui/package.json') == '' }}
+        run: echo 'Frontend is not implemented yet; its build was skipped.' >> "$GITHUB_STEP_SUMMARY"
