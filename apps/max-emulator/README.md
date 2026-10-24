@@ -129,6 +129,7 @@ bot.set_api_url("http://localhost:8081")
 ```bash
 uv run ruff check .
 uv run ruff format --check .
+uv run ty check
 uv run pytest
 ```
 

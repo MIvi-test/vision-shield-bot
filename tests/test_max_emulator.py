@@ -208,6 +208,7 @@ def test_maxapi_over_http_receives_text_photo_and_stores_reply():
                 # Exercise the same startup checks as start_polling.
                 dp.polling = True
                 await dp.startup(bot)
+                assert bot.me is not None
                 assert bot.me.user_id == 1001
                 async with httpx.AsyncClient(base_url=url, headers=HEADERS) as client:
                     for content in ({"text": "/start"}, {"photo": True}):
@@ -236,6 +237,8 @@ def test_maxapi_over_http_receives_text_photo_and_stores_reply():
                     )
                     assert downloaded.content.startswith(b"\x89PNG\r\n\x1a\n")
                     sent = await bot.send_message(user_id=2001, text="Direct SDK reply")
+                    assert sent is not None
+                    assert sent.message.body is not None
                     stored = (await client.get("/__test__/outgoing")).json()["messages"]
                     assert [m["body"]["text"] for m in stored] == [
                         "SDK test reply",
