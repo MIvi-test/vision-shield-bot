@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service currently contains documentation, scaffolding, and Gitleaks CI; application code, dependency manifests, tests, and Compose are not implemented yet.
+This MAX photo moderation service currently contains documentation, scaffolding, Python development tooling, and CI; application code, tests, frontend manifests, and Compose are not implemented yet.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.
@@ -19,7 +19,7 @@ Create directories as implementation begins.
 - `git status --short`: inspect changed and untracked files.
 - `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
-There is no working build or service launch command yet. Compose arrives in S1-03. Once Python tooling is configured, use `ruff check .`, `ruff format --check .`, and `pytest`. Document actual frontend commands when its package manifest exists.
+There is no working service launch command yet. Compose arrives in S1-03. Install Python development tooling with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest`. Until tests exist, pytest exits with code 5 and CI explicitly skips it. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
 
 ## Coding Style & Naming Conventions
 
@@ -33,7 +33,7 @@ Use pytest for Python and contract tests; Vitest is planned for the frontend. Na
 
 History contains Russian and English summaries, including `docs: add architecture, MVP and sprint plan`; no strict commit convention is established. Use concise, descriptive messages and task branches such as `s1-05-max-emulator`.
 
-Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks runs on push and PR; making it a required check needs separate GitHub configuration. Other CI checks remain in S1-02.
+Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks, Python checks, and Frontend build run on push and PR; making them required checks needs separate GitHub configuration. S1-02 remains open until merge blocking is verified and real tests and frontend build exist.
 
 ## Security & Architecture Boundaries
 

@@ -1,0 +1,27 @@
+[project]
+name = "vision-shield-bot"
+version = "0.1.0"
+description = "MAX photo moderation service"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3,<10",
+    "ruff>=0.14,<1",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+python_files = ["test_*.py", "*_test.py"]
+norecursedirs = [".git", ".venv", "node_modules", "dist", "build"]
