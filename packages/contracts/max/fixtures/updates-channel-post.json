@@ -1,0 +1,38 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/updates",
+    "query": {
+      "marker": "1004"
+    }
+  },
+  "status": 200,
+  "body": {
+    "updates": [
+      {
+        "message": {
+          "recipient": {
+            "chat_type": "channel",
+            "chat_id": -1001
+          },
+          "timestamp": 1800001013000,
+          "body": {
+            "mid": "test-message-5",
+            "seq": 1005,
+            "text": "synthetic-1008"
+          }
+        },
+        "timestamp": 1800001013000,
+        "update_type": "message_created"
+      }
+    ],
+    "marker": 1005
+  }
+}

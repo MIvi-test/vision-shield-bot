@@ -1,0 +1,41 @@
+{
+  "provenance": {
+    "scenario": "send_text_to_dialog",
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/messages",
+    "query": {
+      "chat_id": "1002"
+    }
+  },
+  "status": 200,
+  "body": {
+    "message": {
+      "recipient": {
+        "chat_type": "dialog",
+        "chat_id": 1002,
+        "user_id": 1002
+      },
+      "timestamp": 1800001018000,
+      "body": {
+        "mid": "test-message-8",
+        "seq": 1008,
+        "text": "synthetic-1007"
+      },
+      "sender": {
+        "user_id": 1001,
+        "first_name": "synthetic-1001",
+        "is_bot": true,
+        "username": "synthetic-1002",
+        "last_activity_time": 1800001019000,
+        "name": "synthetic-1001"
+      }
+    }
+  }
+}

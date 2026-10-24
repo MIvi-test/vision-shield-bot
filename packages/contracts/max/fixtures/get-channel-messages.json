@@ -1,0 +1,91 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/messages",
+    "query": {
+      "chat_id": "-1001",
+      "count": "50"
+    }
+  },
+  "status": 200,
+  "body": {
+    "messages": [
+      {
+        "recipient": {
+          "chat_type": "channel",
+          "chat_id": -1001
+        },
+        "timestamp": 1800001022000,
+        "body": {
+          "mid": "test-message-10",
+          "seq": 1010,
+          "text": "synthetic-1010",
+          "attachments": [
+            {
+              "payload": {
+                "photo_id": 1004,
+                "token": "synthetic-token-1007",
+                "url": "https://example.invalid/asset/1008"
+              },
+              "type": "image"
+            },
+            {
+              "payload": {
+                "buttons": [
+                  [
+                    {
+                      "payload": "synthetic-1011",
+                      "text": "synthetic-1012",
+                      "type": "callback"
+                    }
+                  ]
+                ]
+              },
+              "type": "inline_keyboard"
+            }
+          ]
+        },
+        "stat": {
+          "views": 1
+        }
+      },
+      {
+        "recipient": {
+          "chat_type": "channel",
+          "chat_id": -1001
+        },
+        "timestamp": 1800001002000,
+        "body": {
+          "mid": "test-message-11",
+          "seq": 1011,
+          "text": "synthetic-1013"
+        },
+        "stat": {
+          "views": 2
+        }
+      },
+      {
+        "recipient": {
+          "chat_type": "channel",
+          "chat_id": -1001
+        },
+        "timestamp": 1800001013000,
+        "body": {
+          "mid": "test-message-5",
+          "seq": 1005,
+          "text": "synthetic-1008"
+        },
+        "stat": {
+          "views": 2
+        }
+      }
+    ]
+  }
+}

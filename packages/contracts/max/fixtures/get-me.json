@@ -1,0 +1,26 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/me",
+    "query": {}
+  },
+  "status": 200,
+  "body": {
+    "user_id": 1001,
+    "first_name": "synthetic-1001",
+    "is_bot": true,
+    "username": "synthetic-1002",
+    "last_activity_time": 1800001001000,
+    "description": "synthetic-1003",
+    "avatar_url": "https://example.invalid/asset/1001",
+    "full_avatar_url": "https://example.invalid/asset/1002",
+    "name": "synthetic-1001"
+  }
+}
