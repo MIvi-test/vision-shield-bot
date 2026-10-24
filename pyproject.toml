@@ -15,6 +15,7 @@ dev = [
     "maxapi==1.2.3",
     "pytest>=8.3,<10",
     "ruff>=0.14,<1",
+    "ty>=0.0.91,<0.1",
 ]
 
 [tool.uv]
@@ -26,6 +27,9 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ty.environment]
+root = [".", "apps/max-emulator"]
 
 [tool.pytest.ini_options]
 pythonpath = ["apps/max-emulator"]

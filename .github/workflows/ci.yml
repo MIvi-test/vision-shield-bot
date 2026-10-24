@@ -40,6 +40,9 @@ jobs:
       - name: Ruff format
         run: uv run --no-sync ruff format --check .
 
+      - name: ty type check
+        run: uv run --no-sync ty check
+
       - name: pytest
         if: ${{ hashFiles('**/test_*.py', '**/*_test.py', '!**/.venv/**', '!**/venv/**', '!**/node_modules/**') != '' }}
         run: uv run --no-sync pytest

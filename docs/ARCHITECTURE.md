@@ -79,7 +79,7 @@ flowchart LR
 | CV | Готовая модель тематики и отдельная проверка NSFW | Конкретные веса выбираются по результатам эксперимента |
 | Хранилище | Приватное S3-compatible; локально и на демо MinIO | Оригиналы и очищенные изображения |
 | Интерфейс | React + TypeScript | Модерация, история, рейтинг и розыгрыш |
-| Запуск и проверки | Docker Compose, GitHub Actions, pytest, Ruff, TypeScript checks, Vitest; Playwright и k6 по необходимости | Воспроизводимый стенд, CI и тесты ([testing.md](testing.md)) |
+| Запуск и проверки | Docker Compose, GitHub Actions, pytest, Ruff, ty, TypeScript checks, Vitest; Playwright и k6 по необходимости | Воспроизводимый стенд, CI и тесты ([testing.md](testing.md)) |
 | Наблюдаемость | JSON-логи; затем Prometheus + Grafana | Диагностика заявок и очередей, метрики из постановки |
 
 Версии зависимостей, образы и веса модели закрепляем после проверки совместимости с доступным CPU/RAM. GPU не является условием первого сценария.
