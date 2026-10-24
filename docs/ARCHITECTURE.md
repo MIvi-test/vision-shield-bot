@@ -105,6 +105,12 @@ Backend API, consumer, dispatcher, fetcher и publisher используют о�
 
 Каталоги появляются по мере работы, а не заранее.
 
+Реализован [эмулятор MAX v0](../apps/max-emulator/README.md): отдельный
+FastAPI/Uvicorn-процесс с журналом событий и ответов в памяти. Поддерживает
+polling текста и фото через `maxapi`, раздаёт одну синтетическую PNG-фикстуру;
+подключение Backend и общий стенд ожидают S1-06 и S1-03.
+Интеграция скачивания с fetcher, upload и канал — S2-12.
+
 ```text
 apps/backend/              # API, домен, consumer, outbox, fetcher, MAX-адаптер, модерация, розыгрыш
 apps/max-emulator/         # Dev1: имитация API MAX, сообщений и канала
