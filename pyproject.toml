@@ -2,7 +2,7 @@
 name = "vision-shield-bot"
 version = "0.1.0"
 description = "MAX photo moderation service"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = []
 
 [dependency-groups]
@@ -15,7 +15,7 @@ dev = [
 package = false
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 88
 
 [tool.ruff.lint]
