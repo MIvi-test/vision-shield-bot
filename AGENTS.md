@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service currently contains documentation, scaffolding, Python development tooling, and CI; application code, tests, frontend manifests, and Compose are not implemented yet.
+This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend, workers, frontend manifests, and Compose are not implemented yet.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.
@@ -19,7 +19,7 @@ Create directories as implementation begins.
 - `git status --short`: inspect changed and untracked files.
 - `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
-There is no working service launch command yet. Compose arrives in S1-03. Install Python development tooling with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest`. Until tests exist, pytest exits with code 5 and CI explicitly skips it. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
+Launch the standalone emulator with `uv run uvicorn max_emulator:create_app --factory --app-dir apps/max-emulator --host 127.0.0.1 --port 8081`; see `apps/max-emulator/README.md`. Compose arrives in S1-03. Install Python dependencies with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest`. SDK integration tests bind only to a random localhost port. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
 
 ## Coding Style & Naming Conventions
 
