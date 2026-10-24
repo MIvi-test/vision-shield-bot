@@ -1,0 +1,21 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/messages",
+    "query": {
+      "message_ids": "test-message-10",
+      "count": "50"
+    }
+  },
+  "status": 200,
+  "body": {
+    "messages": []
+  }
+}

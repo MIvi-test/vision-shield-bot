@@ -18,6 +18,7 @@
 | [security.md](security.md) | Файловый конвейер, меры защиты, персональные данные | Dev4 |
 | [testing.md](testing.md) | Виды тестов, правила допуска, метрики постановки | Dev4 |
 | [operations.md](operations.md) | Окружения, запуск, логи и метрики | Dev1 |
+| [results/max-check.md](results/max-check.md) | Протокол проверки реального MAX (S1-04) | Dev1 |
 | [risks.md](risks.md) | Риски и открытые решения | Команда |
 
 ## 1. Объём проекта

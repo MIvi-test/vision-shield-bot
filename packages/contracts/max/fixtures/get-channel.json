@@ -1,0 +1,30 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/chats/{chat_id}",
+    "query": {}
+  },
+  "status": 200,
+  "body": {
+    "chat_id": -1001,
+    "type": "channel",
+    "status": "active",
+    "last_event_time": 1800001002000,
+    "participants_count": 2,
+    "is_public": false,
+    "title": "synthetic-1004",
+    "owner_id": 1002,
+    "participants": {
+      "1001": 0
+    },
+    "link": "https://example.invalid/asset/1003",
+    "messages_count": 2
+  }
+}

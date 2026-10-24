@@ -1,0 +1,82 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/updates",
+    "query": {}
+  },
+  "status": 200,
+  "body": {
+    "updates": [
+      {
+        "message": {
+          "recipient": {
+            "chat_type": "dialog",
+            "chat_id": 1002,
+            "user_id": 1001
+          },
+          "timestamp": 1800001006000,
+          "body": {
+            "mid": "test-message-1",
+            "seq": 1001,
+            "text": "synthetic-1005"
+          },
+          "sender": {
+            "user_id": 1002,
+            "first_name": "synthetic-1006",
+            "is_bot": false,
+            "last_name": "",
+            "last_activity_time": 1800001007000,
+            "name": "synthetic-1006"
+          }
+        },
+        "timestamp": 1800001006000,
+        "user_locale": "en",
+        "update_type": "message_created"
+      },
+      {
+        "message": {
+          "recipient": {
+            "chat_type": "dialog",
+            "chat_id": 1002,
+            "user_id": 1001
+          },
+          "timestamp": 1800001008000,
+          "body": {
+            "mid": "test-message-2",
+            "seq": 1002,
+            "text": "",
+            "attachments": [
+              {
+                "payload": {
+                  "photo_id": 1001,
+                  "token": "synthetic-token-1001",
+                  "url": "https://example.invalid/asset/1004"
+                },
+                "type": "image"
+              }
+            ]
+          },
+          "sender": {
+            "user_id": 1002,
+            "first_name": "synthetic-1006",
+            "is_bot": false,
+            "last_name": "",
+            "last_activity_time": 1800001007000,
+            "name": "synthetic-1006"
+          }
+        },
+        "timestamp": 1800001008000,
+        "user_locale": "en",
+        "update_type": "message_created"
+      }
+    ],
+    "marker": 1001
+  }
+}

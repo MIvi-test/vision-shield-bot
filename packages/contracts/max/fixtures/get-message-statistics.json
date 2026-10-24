@@ -1,0 +1,62 @@
+{
+  "provenance": {
+    "scenario": "message_statistics; reaction data not observed after add/change/remove",
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/messages",
+    "query": {
+      "message_ids": "test-message-10",
+      "count": "50"
+    }
+  },
+  "status": 200,
+  "body": {
+    "messages": [
+      {
+        "recipient": {
+          "chat_type": "channel",
+          "chat_id": -1001
+        },
+        "timestamp": 1800001022000,
+        "body": {
+          "mid": "test-message-10",
+          "seq": 1010,
+          "text": "synthetic-1010",
+          "attachments": [
+            {
+              "payload": {
+                "photo_id": 1004,
+                "token": "synthetic-token-1010",
+                "url": "https://example.invalid/asset/1008"
+              },
+              "type": "image"
+            },
+            {
+              "payload": {
+                "buttons": [
+                  [
+                    {
+                      "payload": "synthetic-1011",
+                      "text": "synthetic-1012",
+                      "type": "callback"
+                    }
+                  ]
+                ]
+              },
+              "type": "inline_keyboard"
+            }
+          ]
+        },
+        "stat": {
+          "views": 2
+        }
+      }
+    ]
+  }
+}

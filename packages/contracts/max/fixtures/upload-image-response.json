@@ -1,0 +1,24 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/uploadImage",
+    "query": {
+      "r": "synthetic-1009"
+    }
+  },
+  "status": 200,
+  "body": {
+    "photos": {
+      "1003": {
+        "token": "synthetic-token-1005"
+      }
+    }
+  }
+}

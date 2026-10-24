@@ -1,0 +1,76 @@
+{
+  "provenance": {
+    "source": "real MAX test Bot API",
+    "observed_on": "2026-10-24",
+    "sdk": "maxapi 1.2.3",
+    "anonymized": true,
+    "changes": "IDs, timestamps, text, tokens and URLs replaced; JSON shape retained"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/updates",
+    "query": {
+      "marker": "1009"
+    }
+  },
+  "status": 200,
+  "body": {
+    "updates": [
+      {
+        "callback": {
+          "timestamp": 1800001023000,
+          "callback_id": "test-callback-1",
+          "user": {
+            "user_id": 1002,
+            "first_name": "synthetic-1006",
+            "is_bot": false,
+            "last_name": "",
+            "last_activity_time": 1800001024000,
+            "name": "synthetic-1006"
+          },
+          "payload": "synthetic-1011"
+        },
+        "timestamp": 1800001023000,
+        "message": {
+          "recipient": {
+            "chat_type": "channel",
+            "chat_id": -1001
+          },
+          "timestamp": 1800001022000,
+          "body": {
+            "mid": "test-message-10",
+            "seq": 1010,
+            "text": "synthetic-1010",
+            "attachments": [
+              {
+                "payload": {
+                  "photo_id": 1004,
+                  "token": "synthetic-token-1009",
+                  "url": "https://example.invalid/asset/1008"
+                },
+                "type": "image"
+              },
+              {
+                "payload": {
+                  "buttons": [
+                    [
+                      {
+                        "payload": "synthetic-1011",
+                        "text": "synthetic-1012",
+                        "type": "callback"
+                      }
+                    ]
+                  ]
+                },
+                "type": "inline_keyboard"
+              }
+            ]
+          }
+        },
+        "user_locale": "en",
+        "update_type": "message_callback"
+      }
+    ],
+    "marker": 1010
+  }
+}
