@@ -3,7 +3,8 @@
 Тематическая фотолента в MAX с автоматической и ручной модерацией.
 
 Архитектура — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
-задачи — [docs/sprints.md](docs/sprints.md), роли — [docs/team.md](docs/team.md).
+задачи — [docs/sprints.md](docs/sprints.md), роли — [docs/team.md](docs/team.md),
+история изменений — [CHANGELOG.md](CHANGELOG.md).
 
 Выполненная Dev1 работа: подготовка репозитория, CI и Python-инструменты,
 проверка реального MAX с обезличенными ответами и эмулятор MAX v0 с тестами.
