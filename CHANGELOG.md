@@ -9,6 +9,21 @@
 ### Добавлено
 
 - Этот changelog с историей разработки и ссылками из README и плана спринтов.
+- Security workflow: CodeQL `security-extended` для Python и GitHub Actions,
+  аудит всего `uv.lock` через `uv audit --locked` на PR, push в `main`/`develop`,
+  еженедельно и вручную. Ошибки аудита не скрываются.
+- Инструкция обязательных checks и Code scanning merge protection для
+  `main` и `develop`; фактическая проверка блокировки merge остаётся S1-19.
+
+### Изменено
+
+- Обновлены Pydantic до 2.14.2, pytest до 9.2.0, Ruff до 0.17.3 и ty до 0.0.95;
+  пересобран `uv.lock` с обновлением совместимых транзитивных зависимостей:
+  anyio 4.16.0, opentelemetry-api 1.45.2, pydantic-core 2.50.2.
+- uv в CI обновлён до 0.13.6; checkout, setup-python, setup-node и CodeQL
+  закреплены полными SHA актуальных стабильных релизов. Gitleaks 8.30.1
+  продолжает проверять каждый push во все ветки/теги и PR, без фильтров путей
+  и отмены предыдущего запуска.
 
 ## 2026-11-02
 
