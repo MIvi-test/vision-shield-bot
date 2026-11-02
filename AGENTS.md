@@ -33,8 +33,8 @@ Use pytest for Python and contract tests; Vitest is planned for the frontend. Na
 
 History contains Russian and English summaries, including `docs: add architecture, MVP and sprint plan`; no strict commit convention is established. Use concise, descriptive messages and task branches such as `s1-05-max-emulator`.
 
-Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks, Python checks, and Frontend build run on push and PR; making them required checks needs separate GitHub configuration. S1-02 remains open until merge blocking is verified and real tests and frontend build exist.
+Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks, Python checks, and Frontend build run on push and PR; making them required checks needs separate GitHub configuration (S1-19). Preserve completed S1-01, S1-02, S1-04, and S1-05 with Dev1's authorship. Real frontend build and Backend/emulator integration are separate acceptance tasks (S1-11 and S1-16), not reasons to reopen delivered work.
 
 ## Security & Architecture Boundaries
 
-Never commit `.env`, credentials, personal data, or signed URLs. Keep `.env.example` limited to placeholders. The emulator imitates MAX APIs; Backend owns bot replies and submission state. Media and CV must not receive database credentials or MAX tokens; their target deployment has no internet access. Follow `docs/security.md`.
+Never commit `.env`, credentials, personal data, or signed URLs. Keep `.env.example` limited to placeholders. Dev1 owns the emulator and test infrastructure. Dev2 owns Backend, the MAX adapter, fetching into quarantine, bot replies, and submission state. Dev3 owns media and CV; these workers must not receive database credentials or MAX tokens, and their target deployment has no internet access. Dev4 owns UI, datasets, and AppSec verification. Follow `docs/security.md`.
