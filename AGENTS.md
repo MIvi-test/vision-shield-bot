@@ -17,6 +17,7 @@ Create directories as implementation begins.
 - `cp .env.example .env`: prepare local configuration; fill credentials locally.
 - `git diff --check`: check whitespace before submitting changes.
 - `git status --short`: inspect changed and untracked files.
+- `uv lock --check` and `uv audit --locked`: validate and audit all locked Python dependencies, including development groups, using uv 0.13.6.
 - `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
 Launch the standalone emulator with `uv run uvicorn max_emulator:create_app --factory --app-dir apps/max-emulator --host 127.0.0.1 --port 8081`; see `apps/max-emulator/README.md`. Compose arrives in S1-03. Install Python dependencies with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check`, and `uv run pytest`. SDK integration tests bind only to a random localhost port. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
@@ -33,7 +34,7 @@ Use pytest for Python and contract tests; Vitest is planned for the frontend. Na
 
 History contains Russian and English summaries, including `docs: add architecture, MVP and sprint plan`; no strict commit convention is established. Use concise, descriptive messages and task branches such as `s1-05-max-emulator`.
 
-Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks, Python checks, and Frontend build run on push and PR; making them required checks needs separate GitHub configuration (S1-19). Preserve completed S1-01, S1-02, S1-04, and S1-05 with Dev1's authorship. Real frontend build and Backend/emulator integration are separate acceptance tasks (S1-11 and S1-16), not reasons to reopen delivered work.
+Use the PR template: reference the task, explain behavior, report checks, and identify risks. Select a reviewer manually and obtain one teammate approval; administrators can bypass protection. CODEOWNERS is deferred. Gitleaks scans every push (all branches/tags) and PR. Python checks and Frontend build run on push and PR; Dependency audit and CodeQL (Python and GitHub Actions) run on PR, main/develop pushes, weekly, and manually. Actions are pinned to full commit SHAs. Required checks and CodeQL alert merge protection for main/develop need separate GitHub configuration and verification (S1-19). Preserve completed S1-01, S1-02, S1-04, and S1-05 with Dev1's authorship. Real frontend build and Backend/emulator integration are separate acceptance tasks (S1-11 and S1-16), not reasons to reopen delivered work.
 
 ## Security & Architecture Boundaries
 
