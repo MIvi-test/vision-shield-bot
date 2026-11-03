@@ -1,0 +1,548 @@
+openapi: 3.1.0
+
+info:
+  title: Moderator panel API
+  version: 0.1.0
+  summary: Контракт API панели модератора, версия v0 (спринт 1, задача S1-12).
+  description: |
+    Черновик. Пишет Dev4, согласует и реализует Dev2.
+
+    **В v0:** вход, выход, текущий пользователь, список заявок и карточка заявки.
+    Превью фото, решения модератора и ответ `409` появятся в спринте 2 (S2-06).
+
+    **Вход.** Cookie-сессия. После входа сервер ставит cookie `session`
+    (`HttpOnly`, `SameSite=Strict`, `Secure` вне локальной разработки), а в теле
+    ответа возвращает `csrf_token`. Панель добавляет его в заголовок
+    `X-CSRF-Token` к каждому запросу, который меняет данные (`POST`, `PUT`,
+    `PATCH`, `DELETE`), кроме входа.
+
+    **Роли.** `moderator`, `organizer`, `admin`. В v0 нужна только `moderator`;
+    `admin` может всё, что `moderator`. Роль проверяет сервер, панель лишь
+    скрывает недоступные действия. Требуемая роль каждой операции указана в
+    поле `x-required-role`.
+
+    **Чего нет в ответах (намеренно).** MAX `user_id`, имён пользователей,
+    токенов, ссылок на вложения и содержимого фото. Автор заявки показывается
+    внутренним идентификатором `author_ref`.
+
+    **Ошибки.** Все ошибки имеют вид `{code, message}`, где `message` не
+    раскрывает внутренние правила защиты.
+
+servers:
+  - url: /api
+    description: Относительный адрес; в разработке панель обращается к мок-серверу или Backend по тому же пути.
+
+tags:
+  - name: auth
+    description: Вход и выход.
+  - name: submissions
+    description: Заявки на публикацию.
+
+security:
+  - cookieAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Войти
+      description: >-
+        Проверяет логин и пароль, создаёт сессию и возвращает CSRF-токен.
+        Не требует входа. Повторные неудачные попытки ограничиваются
+        (`429`).
+      security: []
+      x-required-role: none
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: moderator
+              password: example-password
+      responses:
+        '200':
+          description: Вход выполнен. В заголовке `Set-Cookie` приходит `session`.
+          headers:
+            Set-Cookie:
+              description: Cookie `session` с флагами `HttpOnly`, `SameSite=Strict`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                user:
+                  id: 7f3c2b6e-1d44-4a3e-9d0a-5b1c9e8a1f20
+                  username: moderator
+                  role: moderator
+                csrf_token: Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA
+        '401':
+          $ref: '#/components/responses/InvalidCredentials'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: logout
+      summary: Выйти
+      description: Завершает сессию и удаляет cookie.
+      x-required-role: moderator
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '204':
+          description: Сессия завершена.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfFailed'
+
+  /auth/me:
+    get:
+      tags: [auth]
+      operationId: getCurrentUser
+      summary: Текущий пользователь
+      description: >-
+        Нужен панели после перезагрузки страницы: показывает, есть ли действующая
+        сессия, какая роль, и выдаёт актуальный `csrf_token`.
+        (Предложение Dev4, не входило в список S1-12: уточнить с Dev2.)
+      x-required-role: moderator
+      responses:
+        '200':
+          description: Сессия действует.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                user:
+                  id: 7f3c2b6e-1d44-4a3e-9d0a-5b1c9e8a1f20
+                  username: moderator
+                  role: moderator
+                csrf_token: Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /submissions:
+    get:
+      tags: [submissions]
+      operationId: listSubmissions
+      summary: Список заявок
+      description: >-
+        Заявки от новых к старым. Страницы выдаются по курсору: передайте
+        `next_cursor` из предыдущего ответа в параметр `cursor`. Курсор лучше номера
+        страницы: список не сдвигается, когда появляются новые заявки.
+      x-required-role: moderator
+      parameters:
+        - name: status
+          in: query
+          description: Показать только заявки с этим статусом.
+          schema:
+            $ref: '#/components/schemas/SubmissionStatus'
+        - name: limit
+          in: query
+          description: Сколько заявок вернуть.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: Значение `next_cursor` из предыдущего ответа. Непрозрачная строка, не разбирайте её.
+          schema:
+            type: string
+            maxLength: 256
+      responses:
+        '200':
+          description: Страница заявок.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionPage'
+              examples:
+                firstPage:
+                  summary: Первая страница, есть продолжение
+                  value:
+                    items:
+                      - id: 3b9d7a52-8e2f-4c11-a1d6-0f4a6c9b2e71
+                        status: validating
+                        created_at: '2026-11-03T10:15:00Z'
+                        updated_at: '2026-11-03T10:15:02Z'
+                        author_ref: usr_4f2a91
+                        campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
+                        version: 2
+                      - id: 9a1f4c30-77b5-4d2a-b8e3-6d5c4b3a2f10
+                        status: awaiting_consent
+                        created_at: '2026-11-03T10:12:41Z'
+                        updated_at: '2026-11-03T10:12:41Z'
+                        author_ref: usr_b81c07
+                        campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
+                        version: 1
+                    next_cursor: eyJ0IjoiMjAyNi0xMS0wM1QxMDoxMjo0MVoifQ
+                lastPage:
+                  summary: Последняя страница
+                  value:
+                    items:
+                      - id: 5e7b2d19-33a4-4b8c-9f01-a2b3c4d5e6f7
+                        status: awaiting_consent
+                        created_at: '2026-11-03T09:01:10Z'
+                        updated_at: '2026-11-03T09:01:10Z'
+                        author_ref: usr_0c9d12
+                        campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
+                        version: 1
+                    next_cursor: null
+                empty:
+                  summary: Заявок нет
+                  value:
+                    items: []
+                    next_cursor: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /submissions/{submission_id}:
+    get:
+      tags: [submissions]
+      operationId: getSubmission
+      summary: Карточка заявки
+      description: >-
+        Данные заявки и вся история смены статусов. Изображения в v0 не
+        показываются: превью появится в спринте 2.
+      x-required-role: moderator
+      parameters:
+        - $ref: '#/components/parameters/SubmissionId'
+      responses:
+        '200':
+          description: Заявка с историей.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionDetail'
+              example:
+                id: 3b9d7a52-8e2f-4c11-a1d6-0f4a6c9b2e71
+                status: validating
+                created_at: '2026-11-03T10:15:00Z'
+                updated_at: '2026-11-03T10:15:02Z'
+                author_ref: usr_4f2a91
+                campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
+                version: 2
+                consent:
+                  rules_version: rules-v1
+                  accepted_at: '2026-11-03T10:15:01Z'
+                history:
+                  - id: 1
+                    occurred_at: '2026-11-03T10:15:00Z'
+                    from_status: null
+                    to_status: awaiting_consent
+                    reason_code: null
+                    actor: system
+                  - id: 2
+                    occurred_at: '2026-11-03T10:15:02Z'
+                    from_status: awaiting_consent
+                    to_status: validating
+                    reason_code: null
+                    actor: user
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: >-
+        Сессионная cookie, выдаётся при входе. Для запросов, которые меняют данные,
+        дополнительно нужен заголовок `X-CSRF-Token` (параметр `CsrfToken`).
+
+  parameters:
+    CsrfToken:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      description: Токен из `csrf_token` ответа на вход или на `/auth/me`. Защита от подделки запроса с чужого сайта.
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 256
+    SubmissionId:
+      name: submission_id
+      in: path
+      required: true
+      description: Идентификатор заявки.
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Role:
+      type: string
+      description: Роль пользователя панели.
+      enum: [moderator, organizer, admin]
+
+    SubmissionStatus:
+      type: string
+      description: |
+        Статус заявки. Список совпадает с `docs/data-model.md`; значения,
+        которых ещё нет в текущем спринте, могут появляться позже, поэтому панель
+        должна уметь показать неизвестный статус как есть.
+
+        - `awaiting_consent` — ждём согласия с правилами;
+        - `validating` — идёт проверка файла (в спринте 1 только ожидание);
+        - `moderating` — файл очищен, работает автоматическая модерация;
+        - `review_required` — нужно решение человека;
+        - `approved` — одобрено;
+        - `rejected` — отклонено.
+      enum:
+        - awaiting_consent
+        - validating
+        - moderating
+        - review_required
+        - approved
+        - rejected
+
+    Actor:
+      type: string
+      description: Кто вызвал смену статуса.
+      enum: [system, user, moderator]
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+        password:
+          type: string
+          minLength: 1
+          maxLength: 256
+          writeOnly: true
+
+    CurrentUser:
+      type: object
+      required: [id, username, role]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+
+    LoginResponse:
+      type: object
+      required: [user, csrf_token]
+      properties:
+        user:
+          $ref: '#/components/schemas/CurrentUser'
+        csrf_token:
+          type: string
+          description: Отправляйте в заголовке `X-CSRF-Token` с запросами, которые меняют данные.
+
+    Submission:
+      type: object
+      description: Краткие данные заявки для списка.
+      required: [id, status, created_at, updated_at, author_ref, campaign_id, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        author_ref:
+          type: string
+          description: Внутренний идентификатор автора. Не MAX `user_id`.
+          example: usr_4f2a91
+        campaign_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+          description: Номер версии заявки. Нужен для решений модератора со спринта 2 (при конфликте будет `409`).
+
+    Consent:
+      type: object
+      description: Согласие автора с правилами публикации.
+      required: [rules_version, accepted_at]
+      properties:
+        rules_version:
+          type: string
+          description: Идентификатор версии правил, не текст правил.
+          example: rules-v1
+        accepted_at:
+          type: string
+          format: date-time
+
+    HistoryEntry:
+      type: object
+      description: Одна смена статуса заявки.
+      required: [id, occurred_at, from_status, to_status, reason_code, actor]
+      properties:
+        id:
+          type: integer
+          description: Порядковый номер записи в истории заявки.
+        occurred_at:
+          type: string
+          format: date-time
+        from_status:
+          oneOf:
+            - $ref: '#/components/schemas/SubmissionStatus'
+            - type: 'null'
+          description: Предыдущий статус; `null` для создания заявки.
+        to_status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        reason_code:
+          type: [string, 'null']
+          description: Внутренний код причины, например `DUPLICATE`. Не пользовательский текст.
+        actor:
+          $ref: '#/components/schemas/Actor'
+
+    SubmissionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Submission'
+        - type: object
+          required: [consent, history]
+          properties:
+            consent:
+              oneOf:
+                - $ref: '#/components/schemas/Consent'
+                - type: 'null'
+              description: '`null`, пока согласие не получено.'
+            history:
+              type: array
+              description: От старых записей к новым.
+              items:
+                $ref: '#/components/schemas/HistoryEntry'
+
+    SubmissionPage:
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Submission'
+        next_cursor:
+          type: [string, 'null']
+          description: Курсор следующей страницы; `null`, если страниц больше нет.
+
+    ErrorCode:
+      type: string
+      description: Машинный код ошибки.
+      enum:
+        - invalid_credentials
+        - unauthorized
+        - forbidden
+        - csrf_failed
+        - not_found
+        - validation_error
+        - rate_limited
+        - internal_error
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          description: Понятный человеку текст без внутренних подробностей.
+
+  responses:
+    InvalidCredentials:
+      description: Неверный логин или пароль. Сообщение одинаково для обоих случаев.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: invalid_credentials
+            message: Неверный логин или пароль.
+    Unauthorized:
+      description: Нет действующей сессии. Панель показывает страницу входа.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: unauthorized
+            message: Нужно войти в систему.
+    Forbidden:
+      description: Сессия есть, но роли недостаточно.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: forbidden
+            message: Недостаточно прав.
+    CsrfFailed:
+      description: Отсутствует или неверен заголовок `X-CSRF-Token`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: csrf_failed
+            message: Не удалось подтвердить запрос. Обновите страницу.
+    NotFound:
+      description: Заявка не найдена.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: not_found
+            message: Заявка не найдена.
+    ValidationError:
+      description: Неверные параметры запроса.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: validation_error
+            message: Неверные параметры запроса.
+    RateLimited:
+      description: Слишком много запросов. Повторите позже.
+      headers:
+        Retry-After:
+          description: Через сколько секунд можно повторить запрос.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: rate_limited
+            message: Слишком много попыток. Повторите позже.
