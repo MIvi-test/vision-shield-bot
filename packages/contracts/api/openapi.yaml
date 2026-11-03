@@ -93,7 +93,7 @@ paths:
       operationId: logout
       summary: Выйти
       description: Завершает сессию и удаляет cookie.
-      x-required-role: moderator
+      x-required-role: any
       parameters:
         - $ref: '#/components/parameters/CsrfToken'
       responses:
@@ -113,7 +113,7 @@ paths:
         Нужен панели после перезагрузки страницы: показывает, есть ли действующая
         сессия, какая роль, и выдаёт актуальный `csrf_token`.
         (Предложение Dev4, не входило в список S1-12: уточнить с Dev2.)
-      x-required-role: moderator
+      x-required-role: any
       responses:
         '200':
           description: Сессия действует.
