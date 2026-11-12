@@ -8,6 +8,14 @@
 
 ### Добавлено
 
+- Dev2: локальный Backend-бот на maxapi с ответами `/start`, `/help`,
+  на текст и фото без скачивания, с ограниченной дедупликацией в памяти.
+  Добавлен SDK/HTTP-тест с эмулятором; приём заявок и БД остаются дальнейшей
+  работой. maxapi перенесён из dev в основные зависимости без смены версии.
+
+- Dev2: начальный HTTP-каркас Backend с liveness и инструкцией запуска.
+  БД и API панели ещё не реализованы.
+
 - Этот changelog с историей разработки и ссылками из README и плана спринтов.
 - Security workflow: CodeQL `security-extended` для Python и GitHub Actions,
   аудит всего `uv.lock` через `uv audit --locked` на PR, push в `main`/`develop`,

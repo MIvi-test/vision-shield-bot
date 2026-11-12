@@ -772,6 +772,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "maxapi" },
     { name = "pydantic" },
     { name = "uvicorn" },
 ]
@@ -779,7 +780,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "httpx" },
-    { name = "maxapi" },
     { name = "pytest" },
     { name = "ruff" },
     { name = "ty" },
@@ -788,6 +788,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = "==0.162.0" },
+    { name = "maxapi", specifier = "==1.2.3" },
     { name = "pydantic", specifier = "==2.14.2" },
     { name = "uvicorn", specifier = "==0.54.0" },
 ]
@@ -795,7 +796,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "httpx", specifier = "==0.28.1" },
-    { name = "maxapi", specifier = "==1.2.3" },
     { name = "pytest", specifier = ">=9.2,<10" },
     { name = "ruff", specifier = ">=0.17.3,<1" },
     { name = "ty", specifier = ">=0.0.95,<0.1" },
