@@ -39,3 +39,5 @@ Use the PR template: reference the task, explain behavior, report checks, and id
 ## Security & Architecture Boundaries
 
 Never commit `.env`, credentials, personal data, or signed URLs. Keep `.env.example` limited to placeholders. Dev1 owns the emulator and test infrastructure. Dev2 owns Backend, the MAX adapter, fetching into quarantine, bot replies, and submission state. Dev3 owns media and CV; these workers must not receive database credentials or MAX tokens, and their target deployment has no internet access. Dev4 owns UI, datasets, and AppSec verification. Follow `docs/security.md`.
+
+In documentation and examples, pass even synthetic tokens through environment variables instead of placing literal values in authorization headers or other secret-like contexts. Check new examples with Gitleaks; handle unavoidable false positives with narrowly scoped, reviewed exceptions rather than disabling detection rules.

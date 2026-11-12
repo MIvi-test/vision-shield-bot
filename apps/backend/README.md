@@ -54,8 +54,9 @@ localhost, 127.0.0.1, ::1 и max-emulator (для будущего Compose), б�
 В третьем терминале добавьте тестовое сообщение:
 
 ```bash
+export MAX_EMULATOR_TOKEN=local-emulator-token
 curl -sS http://127.0.0.1:8081/__test__/messages \
-  -H 'Authorization: local-emulator-token' \
+  -H "Authorization: $MAX_EMULATOR_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"user_id":2001,"text":"/start"}'
 ```
@@ -65,7 +66,7 @@ curl -sS http://127.0.0.1:8081/__test__/messages \
 
 ```bash
 curl -sS http://127.0.0.1:8081/__test__/outgoing \
-  -H 'Authorization: local-emulator-token'
+  -H "Authorization: $MAX_EMULATOR_TOKEN"
 ```
 
 Бот отвечает только в личных диалогах, пропускает сообщения ботов.
