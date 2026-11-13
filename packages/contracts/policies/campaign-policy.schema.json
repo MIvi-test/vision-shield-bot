@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/policies/campaign-policy.schema.json",
+  "title": "Campaign moderation policy",
+  "description": "Тема и правила модерации одной кампании. Тему задаёт маркетинг (сейчас файлом через PR, позже через панель admin); запреты, пороги и режим проверяет Dev3. Опубликованная версия не меняется: любое изменение — новая policy_version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_version",
+    "campaign_slug",
+    "status",
+    "mode",
+    "theme",
+    "cv",
+    "duplicates"
+  ],
+  "properties": {
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,47}-v[0-9]+$"
+    },
+    "campaign_slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "status": {
+      "description": "draft — можно править до первого использования; approved — версия зафиксирована.",
+      "enum": ["draft", "approved"]
+    },
+    "mode": {
+      "description": "manual — после media заявка сразу идёт человеку, CV не вызывается; auto — CV принимает очевидные решения. auto допустим только с откалиброванными порогами.",
+      "enum": ["manual", "auto"]
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title_ru", "description_ru", "allowed_examples_ru", "not_allowed_examples_ru"],
+      "properties": {
+        "title_ru": {"type": "string", "minLength": 1, "maxLength": 80},
+        "description_ru": {"type": "string", "minLength": 1, "maxLength": 1000},
+        "allowed_examples_ru": {"$ref": "#/$defs/text_list"},
+        "not_allowed_examples_ru": {"$ref": "#/$defs/text_list"}
+      }
+    },
+    "cv": {"$ref": "#/$defs/cv_policy"},
+    "duplicates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "allow_after_rejection"],
+      "properties": {
+        "scope": {"const": "campaign"},
+        "allow_after_rejection": {"type": "boolean"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "auto"}}, "required": ["mode"]},
+      "then": {
+        "properties": {
+          "status": {"const": "approved"},
+          "cv": {"properties": {"thresholds": {"properties": {"calibrated": {"const": true}}}}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text_list": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {"type": "string", "minLength": 1, "maxLength": 200}
+    },
+    "prompt_list": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 3, "maxLength": 120}
+    },
+    "score": {"type": "number", "minimum": 0, "maximum": 1},
+    "cv_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prompt_language", "topic", "prohibited", "thresholds"],
+      "properties": {
+        "prompt_language": {
+          "description": "Язык текстовых шаблонов. en — для англоязычных CLIP; ru допустим только с мультиязычной моделью.",
+          "enum": ["en", "ru"]
+        },
+        "topic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["positive_prompts", "negative_prompts"],
+          "properties": {
+            "positive_prompts": {"$ref": "#/$defs/prompt_list"},
+            "negative_prompts": {"$ref": "#/$defs/prompt_list"}
+          }
+        },
+        "prohibited": {
+          "description": "Категории, которые CV проверяет шаблонами. NSFW проверяется отдельной моделью и сюда не входит.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category", "prompts", "action"],
+            "properties": {
+              "category": {"enum": ["violence", "personal_data", "spam", "minors"]},
+              "prompts": {"$ref": "#/$defs/prompt_list"},
+              "action": {
+                "description": "v0: только review — шаблоны CLIP не дают автоотклонения.",
+                "const": "review"
+              }
+            }
+          }
+        },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "calibrated",
+            "calibration_report",
+            "topic_approve_min",
+            "topic_reject_max",
+            "nsfw_reject_min",
+            "nsfw_review_min",
+            "prohibited_review_min"
+          ],
+          "properties": {
+            "calibrated": {"type": "boolean"},
+            "calibration_report": {
+              "description": "Путь к отчёту S3-02 в docs/results/, по которому выбраны пороги.",
+              "type": ["string", "null"],
+              "pattern": "^docs/results/[a-z0-9._-]+\\.md$"
+            },
+            "topic_approve_min": {"oneOf": [{"$ref": "#/$defs/score"}, {"type": "null"}]},
+            "topic_reject_max": {"oneOf": [{"$ref": "#/$defs/score"}, {"type": "null"}]},
+            "nsfw_reject_min": {"oneOf": [{"$ref": "#/$defs/score"}, {"type": "null"}]},
+            "nsfw_review_min": {"oneOf": [{"$ref": "#/$defs/score"}, {"type": "null"}]},
+            "prohibited_review_min": {"oneOf": [{"$ref": "#/$defs/score"}, {"type": "null"}]}
+          },
+          "if": {"properties": {"calibrated": {"const": true}}},
+          "then": {
+            "properties": {
+              "calibration_report": {"type": "string"},
+              "topic_approve_min": {"$ref": "#/$defs/score"},
+              "topic_reject_max": {"$ref": "#/$defs/score"},
+              "nsfw_reject_min": {"$ref": "#/$defs/score"},
+              "nsfw_review_min": {"$ref": "#/$defs/score"},
+              "prohibited_review_min": {"$ref": "#/$defs/score"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

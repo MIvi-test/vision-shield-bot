@@ -8,6 +8,13 @@
 
 ### Добавлено
 
+- S1-10: политика модерации v0 ([docs/policy.md](docs/policy.md)) и критерии
+  разметки ([docs/dataset.md](docs/dataset.md)). Машиночитаемые файлы в
+  `packages/contracts/policies/`: media-профиль `media-v0` (JPEG/PNG/WEBP по
+  сигнатуре, ≤ 10 МиБ, ≤ 25 Мп, выход JPEG ≤ 2048 px без метаданных), таблица
+  21 кода причин с нейтральными текстами и демо-кампания `nature-v0` в режиме
+  `manual`. JSON Schema для всех трёх; `tests/test_moderation_policy.py`
+  проверяет схемы и согласованность значений, `jsonschema` добавлен в dev-группу.
 - Этот changelog с историей разработки и ссылками из README и плана спринтов.
 - Security workflow: CodeQL `security-extended` для Python и GitHub Actions,
   аудит всего `uv.lock` через `uv audit --locked` на PR, push в `main`/`develop`,
