@@ -34,6 +34,31 @@ async def client():
         yield client
 
 
+async def test_openapi_declares_swagger_authorization(client):
+    response = await client.get("/openapi.json")
+    assert response.status_code == 200
+    schema = response.json()
+    security = schema["components"]["securitySchemes"]["EmulatorToken"]
+    assert security["type"] == "apiKey"
+    assert security["in"] == "header"
+    assert security["name"] == "Authorization"
+    for path in schema["paths"].values():
+        for operation in path.values():
+            assert operation["security"] == [{"EmulatorToken": []}]
+            assert not any(
+                parameter["name"].lower() == "authorization"
+                for parameter in operation.get("parameters", [])
+            )
+    assert (await client.get("/docs")).status_code == 200
+
+
+async def test_missing_auth_still_returns_401(client):
+    request = client.build_request("GET", "/me")
+    del request.headers["Authorization"]
+    assert (await client.send(request)).status_code == 401
+    assert (await client.get("/me")).status_code == 200
+
+
 async def test_marker_replay_latest_limit_and_filter(client):
     assert (await client.get("/updates?timeout=0")).json() == {
         "updates": [],
