@@ -4,9 +4,12 @@ version = "0.1.0"
 description = "MAX photo moderation service"
 requires-python = ">=3.14"
 dependencies = [
+    "alembic==1.20.1",
     "fastapi==0.162.0",
     "maxapi==1.2.3",
+    "psycopg[binary]==3.3.9",
     "pydantic==2.14.2",
+    "sqlalchemy==2.0.57",
     "uvicorn==0.54.0",
 ]
 
