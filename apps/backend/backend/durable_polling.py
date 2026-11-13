@@ -2,11 +2,13 @@
 
 import asyncio
 import os
+from uuid import UUID
 
 from maxapi import Bot
 from maxapi.enums import UpdateType
+from sqlalchemy.orm import Session
 
-from backend.database import database_engine
+from backend.database import Campaign, database_engine
 from backend.inbox import InboxStore, normalize_message
 from backend.polling import create_mock_bot
 
@@ -49,15 +51,29 @@ async def run() -> None:
     engine = database_engine()
     bot = create_mock_bot()
     try:
+        configured_campaign = os.getenv("BACKEND_CAMPAIGN_ID")
+        campaign_id = UUID(configured_campaign) if configured_campaign else None
+        if campaign_id is not None:
+
+            def check_campaign():
+                with Session(engine) as session:
+                    if session.get(Campaign, campaign_id) is None:
+                        raise ValueError("Кампания не найдена; выполните manage.py")
+
+            await asyncio.to_thread(check_campaign)
         identity = await bot.get_me()
         store = InboxStore(
-            engine, os.getenv("MAX_SOURCE_ID", "mock-local"), identity.user_id
+            engine,
+            os.getenv("MAX_SOURCE_ID", "mock-local"),
+            identity.user_id,
+            campaign_id=campaign_id,
         )
         await asyncio.to_thread(store.marker)
         unresolved = await asyncio.to_thread(store.unresolved_count)
         print(
             f"Бот с PostgreSQL запущен. Неопределённых отправок: {unresolved}. "
-            "Они не повторяются автоматически.",
+            f"Приём заявок: {'включён' if campaign_id else 'выключен'}. "
+            "Неопределённые отправки не повторяются автоматически.",
             flush=True,
         )
         adapter = DurablePollingBot(bot, store)

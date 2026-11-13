@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend, workers, frontend manifests, and Compose are not implemented yet.
+This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-07 assumptions still require review. Workers, panel API/frontend manifests, and Compose are not implemented yet. See apps/backend/README.md and docs/results/s1-06-progress.md.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.

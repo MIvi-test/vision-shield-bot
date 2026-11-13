@@ -4,7 +4,7 @@
 
 | Каталог | Назначение | Владелец |
 | --- | --- | --- |
-| [backend/](backend/README.md) | HTTP-каркас, MAX-адаптер и PostgreSQL-inbox; заявки и API панели предстоит реализовать | Dev2 |
+| [backend/](backend/README.md) | HTTP-каркас, MAX-адаптер, PostgreSQL-inbox, согласия и заявки; API панели предстоит реализовать | Dev2 |
 | [max-emulator/](max-emulator/README.md) | Эмулятор MAX v0: polling, текст/фото и сохранение ответов | Dev1 |
 | `media-worker/` | Проверка и очистка изображений | Dev3 |
 | `cv-worker/` | Анализ изображений | Dev3 |
