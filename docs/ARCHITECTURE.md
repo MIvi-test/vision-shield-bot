@@ -17,6 +17,8 @@
 | [contracts.md](contracts.md) | События и очереди, outbox/inbox/ACK, повторы и DLQ, интеграция с MAX | Dev2 |
 | [data-model.md](data-model.md) | Таблицы, статусы заявки, жизненный цикл публикации, дубли, рейтинг и розыгрыш | Dev2 |
 | [moderation.md](moderation.md) | Media, выбор CV, политика модерации, оценка качества | Dev3 |
+| [policy.md](policy.md) | Политика модерации v0: тема кампании, форматы и лимиты, запреты, коды причин, ручная проверка, критерии качества | Dev3 |
+| [dataset.md](dataset.md) | Метки и критерии разметки, безопасный сбор, манифест, разделение данных | Dev3, Dev4 |
 | [security.md](security.md) | Файловый конвейер, меры защиты, персональные данные | Dev4 |
 | [testing.md](testing.md) | Виды тестов, правила допуска, метрики постановки | Dev4 |
 | [operations.md](operations.md) | Окружения, запуск, логи и метрики | Dev1 |
@@ -134,6 +136,8 @@ docs/team.md               # роли и границы ответственно
 docs/contracts.md          # события, очереди, интеграция с MAX
 docs/data-model.md         # таблицы и состояния
 docs/moderation.md         # CV и правила модерации
+docs/policy.md             # политика модерации v0 и лимиты media
+docs/dataset.md            # критерии разметки набора
 docs/security.md           # файлы, меры защиты, персональные данные
 docs/testing.md            # план тестирования
 docs/operations.md         # запуск и диагностика
