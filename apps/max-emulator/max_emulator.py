@@ -6,7 +6,8 @@ import time
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.security import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -111,7 +112,16 @@ def create_app(token: str | None = None) -> FastAPI:
     expected_token = token or os.environ.get("MAX_EMULATOR_TOKEN", LOCAL_TOKEN)
     state = State()
 
-    async def authorize(authorization: Annotated[str | None, Header()] = None):
+    token_header = APIKeyHeader(
+        name="Authorization",
+        scheme_name="EmulatorToken",
+        description="Токен из MAX_EMULATOR_TOKEN, без префикса Bearer.",
+        auto_error=False,
+    )
+
+    async def authorize(
+        authorization: Annotated[str | None, Depends(token_header)],
+    ):
         if authorization != expected_token:
             raise HTTPException(401, "Invalid emulator token")
 
