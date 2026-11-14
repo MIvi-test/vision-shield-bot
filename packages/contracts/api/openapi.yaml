@@ -206,14 +206,14 @@ paths:
                         status: validating
                         created_at: '2026-11-03T10:15:00Z'
                         updated_at: '2026-11-03T10:15:02Z'
-                        author_ref: usr_4f2a91
+                        author_ref: usr_4f2a91c03e7b4d58a6e1f92b0c7d3e85
                         campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
                         version: 2
                       - id: 9a1f4c30-77b5-4d2a-b8e3-6d5c4b3a2f10
                         status: awaiting_consent
                         created_at: '2026-11-03T10:12:41Z'
                         updated_at: '2026-11-03T10:12:41Z'
-                        author_ref: usr_b81c07
+                        author_ref: usr_b81c07d94a2e4f6b8c3d5e7f9a1b2c4d
                         campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
                         version: 1
                     next_cursor: eyJ0IjoiMjAyNi0xMS0wM1QxMDoxMjo0MVoifQ
@@ -225,7 +225,7 @@ paths:
                         status: awaiting_consent
                         created_at: '2026-11-03T09:01:10Z'
                         updated_at: '2026-11-03T09:01:10Z'
-                        author_ref: usr_0c9d12
+                        author_ref: usr_0c9d12e5f7a84b3c9d6e1f2a3b4c5d6e
                         campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
                         version: 1
                     next_cursor: null
@@ -266,7 +266,7 @@ paths:
                 status: validating
                 created_at: '2026-11-03T10:15:00Z'
                 updated_at: '2026-11-03T10:15:02Z'
-                author_ref: usr_4f2a91
+                author_ref: usr_4f2a91c03e7b4d58a6e1f92b0c7d3e85
                 campaign_id: 6c1e0b9a-52d3-4f7e-8a40-1b2c3d4e5f60
                 version: 2
                 consent:
@@ -277,13 +277,13 @@ paths:
                     occurred_at: '2026-11-03T10:15:00Z'
                     from_status: null
                     to_status: awaiting_consent
-                    reason_code: null
-                    actor: system
+                    reason_code: PHOTO_RECEIVED
+                    actor: user
                   - id: 2
                     occurred_at: '2026-11-03T10:15:02Z'
                     from_status: awaiting_consent
                     to_status: validating
-                    reason_code: null
+                    reason_code: CONSENT_ACCEPTED
                     actor: user
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -412,8 +412,8 @@ components:
           format: date-time
         author_ref:
           type: string
-          description: Внутренний идентификатор автора. Не MAX `user_id`.
-          example: usr_4f2a91
+          description: Внутренний случайный идентификатор автора. Не MAX `user_id`; панель не разбирает его формат.
+          example: usr_4f2a91c03e7b4d58a6e1f92b0c7d3e85
         campaign_id:
           type: string
           format: uuid
@@ -457,7 +457,10 @@ components:
           $ref: '#/components/schemas/SubmissionStatus'
         reason_code:
           type: [string, 'null']
-          description: Внутренний код причины, например `DUPLICATE`. Не пользовательский текст.
+          description: >-
+            Машинный код события (`PHOTO_RECEIVED`, `CONSENT_ACCEPTED`) или причины
+            решения (`DUPLICATE` и коды из политики модерации). Не пользовательский
+            текст. Список растёт, поэтому панель показывает неизвестный код как есть.
         actor:
           $ref: '#/components/schemas/Actor'
 
