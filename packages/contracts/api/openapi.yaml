@@ -16,6 +16,21 @@ info:
     `X-CSRF-Token` к каждому запросу, который меняет данные (`POST`, `PUT`,
     `PATCH`, `DELETE`), кроме входа.
 
+    **Сессия.** Действует 8 часов после входа и не продлевается запросами,
+    в том числе `/auth/me`. После истечения любой запрос получает `401`.
+    CSRF-токен один на сессию: `/auth/me` возвращает тот же токен, поэтому
+    несколько вкладок панели не мешают друг другу.
+
+    **Защита входа.** Вход принимает только `application/json`. Сервер
+    проверяет заголовок `Origin` (резервно `Referer`) и отклоняет запросы
+    с чужих сайтов ответом `403`. Политика для запросов без обоих заголовков
+    фиксируется в реализации и тестах.
+
+    **Аккаунты.** Аккаунты панели отдельные и не связаны с аккаунтами авторов
+    фото в MAX. Публичной регистрации и пароля по умолчанию нет: первый
+    аккаунт создаётся административной командой Backend с явно заданным
+    паролем.
+
     **Роли.** `moderator`, `organizer`, `admin`. В v0 нужна только `moderator`;
     `admin` может всё, что `moderator`. Роль проверяет сервер, панель лишь
     скрывает недоступные действия. Требуемая роль каждой операции указана в
@@ -26,7 +41,8 @@ info:
     внутренним идентификатором `author_ref`.
 
     **Ошибки.** Все ошибки имеют вид `{code, message}`, где `message` не
-    раскрывает внутренние правила защиты.
+    раскрывает внутренние правила защиты. Любая операция может вернуть `500`
+    с кодом `internal_error` без технических подробностей.
 
 servers:
   - url: /api
@@ -49,8 +65,8 @@ paths:
       summary: Войти
       description: >-
         Проверяет логин и пароль, создаёт сессию и возвращает CSRF-токен.
-        Не требует входа. Повторные неудачные попытки ограничиваются
-        (`429`).
+        Не требует входа. Запрос с чужого `Origin` отклоняется (`403`).
+        Повторные неудачные попытки ограничиваются (`429`).
       security: []
       x-required-role: none
       requestBody:
@@ -82,17 +98,21 @@ paths:
                 csrf_token: Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA
         '401':
           $ref: '#/components/responses/InvalidCredentials'
+        '403':
+          $ref: '#/components/responses/OriginRejected'
         '422':
           $ref: '#/components/responses/ValidationError'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /auth/logout:
     post:
       tags: [auth]
       operationId: logout
       summary: Выйти
-      description: Завершает сессию и удаляет cookie.
+      description: Отзывает сессию на сервере и удаляет cookie.
       x-required-role: any
       parameters:
         - $ref: '#/components/parameters/CsrfToken'
@@ -103,6 +123,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/CsrfFailed'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /auth/me:
     get:
@@ -111,8 +133,8 @@ paths:
       summary: Текущий пользователь
       description: >-
         Нужен панели после перезагрузки страницы: показывает, есть ли действующая
-        сессия, какая роль, и выдаёт актуальный `csrf_token`.
-        (Предложение Dev4, не входило в список S1-12: уточнить с Dev2.)
+        сессия и какая роль. Возвращает тот же `csrf_token`, что выдан при входе,
+        и не продлевает сессию.
       x-required-role: any
       responses:
         '200':
@@ -129,6 +151,8 @@ paths:
                 csrf_token: Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /submissions:
     get:
@@ -136,9 +160,13 @@ paths:
       operationId: listSubmissions
       summary: Список заявок
       description: >-
-        Заявки от новых к старым. Страницы выдаются по курсору: передайте
-        `next_cursor` из предыдущего ответа в параметр `cursor`. Курсор лучше номера
-        страницы: список не сдвигается, когда появляются новые заявки.
+        Заявки от новых к старым: сортировка `created_at DESC, id DESC`, так что
+        порядок однозначен и при одинаковом времени создания. Страницы выдаются
+        по курсору: передайте `next_cursor` из предыдущего ответа в параметр
+        `cursor`. Курсор лучше номера страницы: список не сдвигается, когда
+        появляются новые заявки. При смене фильтра `status` панель запрашивает
+        первую страницу без курсора. Повреждённый курсор или курсор от другого
+        фильтра возвращает `422`.
       x-required-role: moderator
       parameters:
         - name: status
@@ -156,7 +184,9 @@ paths:
             default: 20
         - name: cursor
           in: query
-          description: Значение `next_cursor` из предыдущего ответа. Непрозрачная строка, не разбирайте её.
+          description: >-
+            Значение `next_cursor` из предыдущего ответа с тем же фильтром `status`.
+            Непрозрачная строка, не разбирайте её.
           schema:
             type: string
             maxLength: 256
@@ -210,6 +240,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /submissions/{submission_id}:
     get:
@@ -261,6 +293,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   securitySchemes:
@@ -390,7 +424,9 @@ components:
 
     Consent:
       type: object
-      description: Согласие автора с правилами публикации.
+      description: >-
+        Согласие автора с правилами публикации. Принадлежит пользователю в рамках
+        кампании и версии правил; заявка ссылается на конкретную запись согласия.
       required: [rules_version, accepted_at]
       properties:
         rules_version:
@@ -514,6 +550,15 @@ components:
           example:
             code: csrf_failed
             message: Не удалось подтвердить запрос. Обновите страницу.
+    OriginRejected:
+      description: Запрос на вход пришёл с недопустимого источника (`Origin` или `Referer`). Защита от подмены входа.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: csrf_failed
+            message: Не удалось подтвердить запрос. Обновите страницу.
     NotFound:
       description: Заявка не найдена.
       content:
@@ -546,3 +591,12 @@ components:
           example:
             code: rate_limited
             message: Слишком много попыток. Повторите позже.
+    InternalError:
+      description: Внутренняя ошибка сервера. Сообщение без технических подробностей.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: internal_error
+            message: Что-то пошло не так. Повторите позже.
