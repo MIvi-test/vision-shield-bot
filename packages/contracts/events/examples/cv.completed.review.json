@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "event_id": "450d2cfe-3a3e-524c-a7b5-03d396589699",
+  "event_type": "cv.completed",
+  "correlation_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "submission_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "operation_id": "7c6b5a49-3827-4615-b4a3-928170615f4e",
+  "causation_id": "c1d2e3f4-a5b6-4c7d-8e9f-a0b1c2d3e4f5",
+  "occurred_at": "2026-11-13T10:00:03.900Z",
+  "producer": "cv-worker",
+  "payload": {
+    "asset_id": "a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012",
+    "policy_version": "nature-v0",
+    "worker_version": "cv-worker-0.1.0",
+    "preprocessing_version": "clip-224-center-v1",
+    "models": {
+      "topic": {
+        "name": "xlm-roberta-base-ViT-B-32",
+        "source": "hf-hub:laion/CLIP-ViT-B-32-xlm-roberta-base-laion5B-s13B-b90k",
+        "revision": "0000000000000000000000000000000000000000",
+        "weights_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "nsfw": {
+        "name": "nsfw_image_detection",
+        "source": "hf-hub:Falconsai/nsfw_image_detection",
+        "revision": "0000000000000000000000000000000000000000",
+        "weights_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      }
+    },
+    "scores": {
+      "topic": 0.61,
+      "nsfw": 0.02,
+      "prohibited": {
+        "violence": 0.04,
+        "personal_data": 0.01,
+        "spam": 0.03,
+        "minors": 0.02
+      }
+    },
+    "recommended_decision": "review_required",
+    "reason_codes": [
+      "LOW_TOPIC_CONFIDENCE"
+    ],
+    "duration_ms": 1730
+  }
+}
