@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/policies/media-profile.schema.json",
+  "title": "Media profile",
+  "description": "Технические лимиты и формат очистки для media worker. Общие для всех кампаний; владелец — Dev3. Кампания и маркетинг эти значения не меняют.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["media_profile_version", "input", "decode", "output"],
+  "properties": {
+    "media_profile_version": {
+      "type": "string",
+      "pattern": "^media-v[0-9]+$"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formats",
+        "max_file_bytes",
+        "max_pixels",
+        "max_side_px",
+        "min_side_px",
+        "max_frames"
+      ],
+      "properties": {
+        "formats": {
+          "description": "Форматы, определяемые по сигнатуре содержимого, а не по MIME или расширению.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/input_format"}
+        },
+        "max_file_bytes": {"type": "integer", "minimum": 1, "maximum": 52428800},
+        "max_pixels": {"type": "integer", "minimum": 1},
+        "max_side_px": {"type": "integer", "minimum": 1, "maximum": 16383},
+        "min_side_px": {"type": "integer", "minimum": 1},
+        "max_frames": {"type": "integer", "const": 1}
+      }
+    },
+    "decode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timeout_ms", "max_memory_bytes", "task_timeout_ms"],
+      "properties": {
+        "timeout_ms": {"type": "integer", "minimum": 100},
+        "max_memory_bytes": {"type": "integer", "minimum": 67108864},
+        "task_timeout_ms": {"type": "integer", "minimum": 1000}
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "quality",
+        "max_side_px",
+        "color_mode",
+        "alpha",
+        "icc",
+        "apply_exif_orientation",
+        "strip_metadata"
+      ],
+      "properties": {
+        "format": {"const": "jpeg"},
+        "quality": {"type": "integer", "minimum": 50, "maximum": 95},
+        "max_side_px": {"type": "integer", "minimum": 320, "maximum": 7680},
+        "color_mode": {"const": "RGB"},
+        "alpha": {"const": "flatten_white"},
+        "icc": {"const": "convert_to_srgb_and_drop"},
+        "apply_exif_orientation": {"const": true},
+        "strip_metadata": {"const": true}
+      }
+    }
+  },
+  "$defs": {
+    "input_format": {"enum": ["jpeg", "png", "webp"]}
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "reason_codes_version": "reasons-v0",
+  "codes": {
+    "ATTACHMENT_UNAVAILABLE": {
+      "stage": "fetcher",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Ссылка на вложение истекла или недоступна после ограниченных повторов.",
+      "user_message_ru": "Не удалось получить фото. Пожалуйста, отправьте его ещё раз."
+    },
+    "FILE_TOO_LARGE": {
+      "stage": "fetcher",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Размер файла больше input.max_file_bytes media-профиля. Проверяют fetcher при скачивании и media повторно.",
+      "user_message_ru": "Файл слишком большой. Отправьте фото размером до 10 МБ."
+    },
+    "DUPLICATE": {
+      "stage": "backend",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "SHA-256 оригинала совпал с уже принятым файлом в той же кампании.",
+      "user_message_ru": "Это фото уже было отправлено. Пришлите, пожалуйста, другое."
+    },
+    "UNSUPPORTED_FORMAT": {
+      "stage": "media",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Сигнатура содержимого не JPEG, PNG или WEBP (в том числе GIF, HEIC, TIFF, SVG, не изображение).",
+      "user_message_ru": "Не удалось обработать файл. Отправьте фото в формате JPEG, PNG или WEBP."
+    },
+    "CORRUPTED_IMAGE": {
+      "stage": "media",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Файл не декодируется полностью или содержит ошибки структуры.",
+      "user_message_ru": "Не удалось обработать файл. Попробуйте отправить фото ещё раз."
+    },
+    "IMAGE_TOO_LARGE": {
+      "stage": "media",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Число пикселей больше input.max_pixels или сторона больше input.max_side_px; проверяется по заголовку до полного декодирования.",
+      "user_message_ru": "Разрешение фото слишком большое. Уменьшите его и отправьте снова."
+    },
+    "IMAGE_TOO_SMALL": {
+      "stage": "media",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Меньшая сторона меньше input.min_side_px (512 px в media-v0).",
+      "user_message_ru": "Фото слишком маленькое. Отправьте снимок в лучшем качестве."
+    },
+    "ANIMATED_IMAGE": {
+      "stage": "media",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Больше одного кадра: анимированный WEBP или APNG.",
+      "user_message_ru": "Анимированные изображения не принимаются. Отправьте обычное фото."
+    },
+    "DECODE_LIMIT_EXCEEDED": {
+      "stage": "media",
+      "effect": "rejected",
+      "moderator_can_approve": false,
+      "description": "Декодирование превысило decode.timeout_ms или decode.max_memory_bytes.",
+      "user_message_ru": "Не удалось обработать файл. Попробуйте отправить другое фото."
+    },
+    "TOPIC_MATCH": {
+      "stage": "cv",
+      "effect": "approved",
+      "moderator_can_approve": true,
+      "description": "Score темы не ниже topic_approve_min, запретные проверки не сработали.",
+      "user_message_ru": "Фото прошло проверку и будет опубликовано."
+    },
+    "OFF_TOPIC": {
+      "stage": "cv",
+      "effect": "rejected",
+      "moderator_can_approve": true,
+      "description": "Score темы не выше topic_reject_max.",
+      "user_message_ru": "К сожалению, фото не подходит к теме «{theme_title}». Попробуйте отправить другое."
+    },
+    "LOW_TOPIC_CONFIDENCE": {
+      "stage": "cv",
+      "effect": "review_required",
+      "moderator_can_approve": true,
+      "description": "Score темы между topic_reject_max и topic_approve_min.",
+      "user_message_ru": "Фото отправлено на проверку модератору. Мы сообщим о результате."
+    },
+    "NSFW_DETECTED": {
+      "stage": "cv",
+      "effect": "rejected",
+      "moderator_can_approve": true,
+      "description": "Score NSFW-классификатора не ниже nsfw_reject_min. Модератор может исправить ложное срабатывание при пересмотре.",
+      "user_message_ru": "Фото не может быть опубликовано: оно не соответствует правилам публикации."
+    },
+    "NSFW_SUSPECTED": {
+      "stage": "cv",
+      "effect": "review_required",
+      "moderator_can_approve": true,
+      "description": "Score NSFW между nsfw_review_min и nsfw_reject_min.",
+      "user_message_ru": "Фото отправлено на проверку модератору. Мы сообщим о результате."
+    },
+    "PROHIBITED_SUSPECTED": {
+      "stage": "cv",
+      "effect": "review_required",
+      "moderator_can_approve": true,
+      "description": "Сработал шаблон одной из запрещённых категорий политики (насилие, персональные данные, реклама, дети в кадре).",
+      "user_message_ru": "Фото отправлено на проверку модератору. Мы сообщим о результате."
+    },
+    "CV_ERROR": {
+      "stage": "backend",
+      "effect": "review_required",
+      "moderator_can_approve": true,
+      "description": "CV вернул ошибку или исчерпал повторы; очищенное фото уходит человеку, автоодобрения нет.",
+      "user_message_ru": "Фото отправлено на проверку модератору. Мы сообщим о результате."
+    },
+    "MODERATOR_APPROVED": {
+      "stage": "moderator",
+      "effect": "approved",
+      "moderator_can_approve": true,
+      "description": "Модератор одобрил фото.",
+      "user_message_ru": "Фото одобрено модератором и будет опубликовано."
+    },
+    "MODERATOR_REJECTED_OFF_TOPIC": {
+      "stage": "moderator",
+      "effect": "rejected",
+      "moderator_can_approve": true,
+      "description": "Модератор отклонил: не по теме.",
+      "user_message_ru": "К сожалению, фото не подходит к теме «{theme_title}». Попробуйте отправить другое."
+    },
+    "MODERATOR_REJECTED_PROHIBITED": {
+      "stage": "moderator",
+      "effect": "rejected",
+      "moderator_can_approve": true,
+      "description": "Модератор отклонил: запрещённый контент по политике.",
+      "user_message_ru": "Фото не может быть опубликовано: оно не соответствует правилам публикации."
+    },
+    "MODERATOR_REJECTED_LOW_QUALITY": {
+      "stage": "moderator",
+      "effect": "rejected",
+      "moderator_can_approve": true,
+      "description": "Модератор отклонил: сильное размытие, засветка, коллаж, скриншот вместо фото.",
+      "user_message_ru": "Фото не прошло модерацию из-за качества снимка. Попробуйте отправить другое."
+    },
+    "MODERATOR_REJECTED_OTHER": {
+      "stage": "moderator",
+      "effect": "rejected",
+      "moderator_can_approve": true,
+      "description": "Модератор отклонил по другой причине; комментарий обязателен во внутренней истории.",
+      "user_message_ru": "Фото не прошло модерацию. Попробуйте отправить другое."
+    }
+  }
+}

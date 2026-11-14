@@ -1,0 +1,104 @@
+{
+  "policy_version": "nature-v0",
+  "campaign_slug": "nature",
+  "status": "draft",
+  "mode": "manual",
+  "theme": {
+    "title_ru": "Природа",
+    "description_ru": "Фотографии живой природы: пейзажи, растения, дикие животные и птицы, небо и вода. Главный объект кадра — природа, а не люди, техника или постройки.",
+    "allowed_examples_ru": [
+      "лес, поле, горы, побережье",
+      "реки, озёра, водопады, море",
+      "дикие животные, птицы, насекомые в естественной среде",
+      "цветы, деревья, грибы крупным планом",
+      "небо, облака, закат, звёзды, погодные явления"
+    ],
+    "not_allowed_examples_ru": [
+      "селфи и портреты, где человек — главный объект",
+      "городские улицы, интерьеры, транспорт",
+      "еда, товары, скриншоты, мемы, картинки с текстом",
+      "домашние животные в помещении"
+    ]
+  },
+  "cv": {
+    "prompt_language": "en",
+    "topic": {
+      "positive_prompts": [
+        "a photo of a natural landscape",
+        "a photo of a forest",
+        "a photo of mountains",
+        "a photo of a lake or a river",
+        "a photo of a sea shore",
+        "a photo of a waterfall",
+        "a photo of a wild animal in nature",
+        "a photo of a bird in the wild",
+        "a close-up photo of a flower or a plant",
+        "a photo of the sky with clouds or a sunset"
+      ],
+      "negative_prompts": [
+        "a photo of a city street",
+        "a photo of a room interior",
+        "a selfie",
+        "a portrait photo of a person",
+        "a photo of food",
+        "a photo of a car",
+        "a photo of a pet indoors",
+        "a screenshot",
+        "a meme with text",
+        "a product photo"
+      ]
+    },
+    "prohibited": [
+      {
+        "category": "violence",
+        "prompts": [
+          "a photo of blood and injuries",
+          "a photo of a dead animal",
+          "a photo of a weapon",
+          "a photo of a violent fight"
+        ],
+        "action": "review"
+      },
+      {
+        "category": "personal_data",
+        "prompts": [
+          "a photo of an identity document",
+          "a photo of a car license plate",
+          "a photo of a screen with personal information"
+        ],
+        "action": "review"
+      },
+      {
+        "category": "spam",
+        "prompts": [
+          "an advertisement banner",
+          "a QR code",
+          "an image with a lot of text",
+          "a brand logo"
+        ],
+        "action": "review"
+      },
+      {
+        "category": "minors",
+        "prompts": [
+          "a photo of a child",
+          "a photo of children playing"
+        ],
+        "action": "review"
+      }
+    ],
+    "thresholds": {
+      "calibrated": false,
+      "calibration_report": null,
+      "topic_approve_min": null,
+      "topic_reject_max": null,
+      "nsfw_reject_min": null,
+      "nsfw_review_min": null,
+      "prohibited_review_min": null
+    }
+  },
+  "duplicates": {
+    "scope": "campaign",
+    "allow_after_rejection": false
+  }
+}

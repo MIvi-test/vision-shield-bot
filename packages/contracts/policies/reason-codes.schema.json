@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/policies/reason-codes.schema.json",
+  "title": "Reason codes",
+  "description": "Единая таблица внутренних кодов причин и нейтральных текстов для автора. Текст не раскрывает пороги, модели и правила защиты.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reason_codes_version", "codes"],
+  "properties": {
+    "reason_codes_version": {"type": "string", "pattern": "^reasons-v[0-9]+$"},
+    "codes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+      "additionalProperties": {"$ref": "#/$defs/reason"}
+    }
+  },
+  "$defs": {
+    "reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "effect",
+        "moderator_can_approve",
+        "description",
+        "user_message_ru"
+      ],
+      "properties": {
+        "stage": {
+          "description": "Кто выставляет код.",
+          "enum": ["fetcher", "backend", "media", "cv", "moderator"]
+        },
+        "effect": {
+          "description": "К какому статусу заявки ведёт код.",
+          "enum": ["approved", "rejected", "review_required"]
+        },
+        "moderator_can_approve": {
+          "description": "false — технический отказ: модератор не может одобрить, нужна новая загрузка.",
+          "type": "boolean"
+        },
+        "description": {"type": "string", "minLength": 1, "maxLength": 300},
+        "user_message_ru": {
+          "description": "Нейтральный текст для автора. Допустимая подстановка: {theme_title}.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
+      }
+    }
+  }
+}
