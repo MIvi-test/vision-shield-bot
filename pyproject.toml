@@ -15,6 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "urllib3==1.26.5",
     "httpx==0.28.1",
     "jsonschema==4.26.0",
     "pytest>=9.2,<10",
