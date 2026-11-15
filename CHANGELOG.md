@@ -14,6 +14,10 @@
 
 ### Добавлено
 
+- S1-19 (Dev1): независимые GitHub ruleset для интеграционной `develop`
+  и релизной `main`, обязательные checks GitHub Actions, CodeQL merge
+  protection и негативные PR-проверки. Конфигурация хранится в GitHub;
+  [отчёт](docs/results/s1-19-progress.md) содержит подтверждения и ограничения.
 - S1-10: политика модерации v0 ([docs/policy.md](docs/policy.md)) и критерии
   разметки ([docs/dataset.md](docs/dataset.md)). Машиночитаемые файлы в
   `packages/contracts/policies/`: media-профиль `media-v0` (JPEG/PNG/WEBP по
