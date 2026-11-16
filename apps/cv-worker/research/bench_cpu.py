@@ -60,6 +60,8 @@ class Candidate:
     kind: str  # "topic" | "nsfw" | "baseline"
     repo: str  # Hugging Face repo id
     weight_files: tuple[str, ...]
+    open_clip_name: str = ""  # для моделей без open_clip_config.json на HF
+    open_clip_pretrained: str = ""
 
 
 CANDIDATES = {
@@ -76,6 +78,8 @@ CANDIDATES = {
             "topic",
             "laion/CLIP-ViT-B-32-xlm-roberta-base-laion5B-s13B-b90k",
             ("open_clip_model.safetensors", "open_clip_pytorch_model.bin"),
+            open_clip_name="xlm-roberta-base-ViT-B-32",
+            open_clip_pretrained="laion5b_s13b_b90k",
         ),
         Candidate(
             "nsfw-falconsai-vit",
@@ -207,9 +211,15 @@ def load_topic(candidate: Candidate, policy: dict[str, Any]) -> Scorer:
     import torch
     from PIL import Image
 
-    hub = f"hf-hub:{candidate.repo}"
-    model, _, preprocess = open_clip.create_model_and_transforms(hub)
-    tokenizer = open_clip.get_tokenizer(hub)
+    if candidate.open_clip_name:
+        model, _, preprocess = open_clip.create_model_and_transforms(
+            candidate.open_clip_name, pretrained=candidate.open_clip_pretrained
+        )
+        tokenizer = open_clip.get_tokenizer(candidate.open_clip_name)
+    else:
+        hub = f"hf-hub:{candidate.repo}"
+        model, _, preprocess = open_clip.create_model_and_transforms(hub)
+        tokenizer = open_clip.get_tokenizer(hub)
     model.eval()
     positive = policy["cv"]["topic"]["positive_prompts"]
     negative = policy["cv"]["topic"]["negative_prompts"]
