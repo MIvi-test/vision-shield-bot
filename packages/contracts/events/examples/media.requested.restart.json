@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "event_id": "f6a7b8c9-d0e1-4f2a-b3c4-d5e6f7a8b9c0",
+  "event_type": "media.requested",
+  "correlation_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "submission_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "operation_id": "e5f6a7b8-c9d0-4e1f-a2b3-c4d5e6f7a8b9",
+  "causation_id": "61728394-9eaf-40b1-82c3-4d5e6f708193",
+  "occurred_at": "2026-11-13T11:00:00Z",
+  "producer": "backend",
+  "payload": {
+    "asset_id": "a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012",
+    "source": {
+      "bucket": "quarantine",
+      "key": "submissions/5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c/e5f6a7b8-c9d0-4e1f-a2b3-c4d5e6f7a8b9/original",
+      "sha256": "9f2b5c7e1a3d4f6b8c0e2a4d6f8b0c2e4a6d8f0b2c4e6a8d0f2b4c6e8a0d2f4b",
+      "size_bytes": 482113
+    },
+    "target": {
+      "bucket": "sanitized",
+      "key": "submissions/5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c/a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012/e5f6a7b8-c9d0-4e1f-a2b3-c4d5e6f7a8b9.jpg"
+    },
+    "media_profile": {
+      "media_profile_version": "media-v0",
+      "input": {
+        "formats": [
+          "jpeg",
+          "png",
+          "webp"
+        ],
+        "max_file_bytes": 10485760,
+        "max_pixels": 25000000,
+        "max_side_px": 8000,
+        "min_side_px": 512,
+        "max_frames": 1
+      },
+      "decode": {
+        "timeout_ms": 5000,
+        "max_memory_bytes": 536870912,
+        "task_timeout_ms": 30000
+      },
+      "output": {
+        "format": "jpeg",
+        "quality": 85,
+        "max_side_px": 2048,
+        "color_mode": "RGB",
+        "alpha": "flatten_white",
+        "icc": "convert_to_srgb_and_drop",
+        "apply_exif_orientation": true,
+        "strip_metadata": true
+      }
+    }
+  }
+}

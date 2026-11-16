@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/common.schema.json",
+  "title": "Common definitions for events",
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "timestamp": {
+      "description": "RFC 3339, только UTC.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+    },
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "object_key": {
+      "description": "Внутренний ключ объекта в MinIO. Не URL: без схемы, хоста, ведущего '/', '..' и пробелов.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[a-z0-9][a-z0-9/_.-]*$",
+      "not": {"pattern": "(\\.\\.|//)"}
+    },
+    "quarantine_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bucket", "key", "sha256", "size_bytes"],
+      "properties": {
+        "bucket": {"const": "quarantine"},
+        "key": {"$ref": "#/$defs/object_key"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "sanitized_target": {
+      "description": "Ключ, который Backend разрешил media записать. Media не выбирает ключ сам.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bucket", "key"],
+      "properties": {
+        "bucket": {"const": "sanitized"},
+        "key": {"$ref": "#/$defs/object_key"}
+      }
+    },
+    "sanitized_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bucket", "key", "sha256"],
+      "properties": {
+        "bucket": {"const": "sanitized"},
+        "key": {"$ref": "#/$defs/object_key"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "version_tag": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$"
+    },
+    "duration_ms": {"type": "integer", "minimum": 0},
+    "worker_error": {
+      "description": "Классифицированная ошибка обработки. Повторяемость задаёт код (см. README), а не отдельное поле.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": {
+          "enum": [
+            "INVALID_TASK",
+            "OBJECT_NOT_FOUND",
+            "OBJECT_HASH_MISMATCH",
+            "STORAGE_UNAVAILABLE",
+            "ACCESS_DENIED",
+            "MODEL_NOT_READY",
+            "TIMEOUT",
+            "INTERNAL"
+          ]
+        },
+        "detail": {
+          "description": "Безопасное короткое описание для журнала: без URL, ключей доступа, путей ФС и содержимого файла.",
+          "type": "string",
+          "maxLength": 200,
+          "not": {"pattern": "(://|[A-Za-z]:\\\\|/home/|/tmp/)"}
+        }
+      }
+    },
+    "media_reason_code": {
+      "enum": [
+        "FILE_TOO_LARGE",
+        "UNSUPPORTED_FORMAT",
+        "CORRUPTED_IMAGE",
+        "IMAGE_TOO_LARGE",
+        "IMAGE_TOO_SMALL",
+        "ANIMATED_IMAGE",
+        "DECODE_LIMIT_EXCEEDED"
+      ]
+    },
+    "cv_reason_code": {
+      "enum": [
+        "TOPIC_MATCH",
+        "OFF_TOPIC",
+        "LOW_TOPIC_CONFIDENCE",
+        "NSFW_DETECTED",
+        "NSFW_SUSPECTED",
+        "PROHIBITED_SUSPECTED"
+      ]
+    },
+    "model_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source", "revision", "weights_sha256"],
+      "properties": {
+        "name": {"$ref": "#/$defs/version_tag"},
+        "source": {
+          "description": "Откуда взяты веса, например hf-hub:<org>/<repo>. Только для воспроизводимости: worker не скачивает веса во время работы.",
+          "type": "string",
+          "maxLength": 200,
+          "pattern": "^hf-hub:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "weights_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

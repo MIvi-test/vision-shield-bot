@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "event_id": "f3141fb9-bf9e-59be-a08d-f7ef4e98f6b1",
+  "event_type": "cv.failed",
+  "correlation_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "submission_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "operation_id": "9d8c7b6a-5f4e-4d3c-b2a1-f0e9d8c7b6a5",
+  "causation_id": "d2e3f4a5-b6c7-4d8e-9fa0-b1c2d3e4f5a6",
+  "occurred_at": "2026-11-13T10:10:00.020Z",
+  "producer": "cv-worker",
+  "payload": {
+    "asset_id": "a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012",
+    "worker_version": "cv-worker-0.1.0",
+    "error": {
+      "code": "MODEL_NOT_READY",
+      "detail": "topic model is not loaded"
+    }
+  }
+}

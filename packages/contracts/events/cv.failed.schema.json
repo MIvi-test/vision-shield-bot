@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/cv.failed.schema.json",
+  "title": "cv.failed",
+  "allOf": [
+    {
+      "$ref": "envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "event_type": {
+      "const": "cv.failed"
+    },
+    "producer": {
+      "const": "cv-worker"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "worker_version",
+        "error"
+      ],
+      "properties": {
+        "asset_id": {
+          "$ref": "common.schema.json#/$defs/uuid"
+        },
+        "worker_version": {
+          "$ref": "common.schema.json#/$defs/version_tag"
+        },
+        "error": {
+          "$ref": "common.schema.json#/$defs/worker_error"
+        }
+      },
+      "description": "Ошибка анализа. Backend направляет очищенное фото человеку (CV_ERROR), автоодобрения нет."
+    }
+  }
+}

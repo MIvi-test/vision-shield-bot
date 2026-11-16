@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/media.requested.schema.json",
+  "title": "media.requested",
+  "allOf": [
+    {
+      "$ref": "envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "event_type": {
+      "const": "media.requested"
+    },
+    "producer": {
+      "const": "backend"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "source",
+        "target",
+        "media_profile"
+      ],
+      "properties": {
+        "asset_id": {
+          "$ref": "common.schema.json#/$defs/uuid"
+        },
+        "source": {
+          "$ref": "common.schema.json#/$defs/quarantine_ref"
+        },
+        "target": {
+          "$ref": "common.schema.json#/$defs/sanitized_target"
+        },
+        "media_profile": {
+          "$ref": "../policies/media-profile.schema.json",
+          "description": "Снимок media-профиля: worker применяет лимиты из задания и возвращает их версию."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "event_id": "d2e3f4a5-b6c7-4d8e-9fa0-b1c2d3e4f5a6",
+  "event_type": "cv.requested",
+  "correlation_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "submission_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "operation_id": "9d8c7b6a-5f4e-4d3c-b2a1-f0e9d8c7b6a5",
+  "causation_id": "50617283-8d9e-4fa0-b1c2-3d4e5f607182",
+  "occurred_at": "2026-11-13T10:10:00Z",
+  "producer": "backend",
+  "payload": {
+    "asset_id": "a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012",
+    "image": {
+      "bucket": "sanitized",
+      "key": "submissions/5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c/a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012/0f9e8d7c-6b5a-4c3d-8e2f-1a0b9c8d7e6f.jpg",
+      "sha256": "3c5e7a9b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1c3e5b7d9f1a3c5e7b9d1f3a5c"
+    },
+    "policy": {
+      "policy_version": "nature-v0",
+      "campaign_slug": "nature",
+      "status": "approved",
+      "mode": "auto",
+      "theme": {
+        "title_ru": "Природа",
+        "description_ru": "Фотографии живой природы: пейзажи, растения, дикие животные и птицы, небо и вода. Главный объект кадра — природа, а не люди, техника или постройки.",
+        "allowed_examples_ru": [
+          "лес, поле, горы, побережье",
+          "реки, озёра, водопады, море",
+          "дикие животные, птицы, насекомые в естественной среде",
+          "цветы, деревья, грибы крупным планом",
+          "небо, облака, закат, звёзды, погодные явления"
+        ],
+        "not_allowed_examples_ru": [
+          "селфи и портреты, где человек — главный объект",
+          "городские улицы, интерьеры, транспорт",
+          "еда, товары, скриншоты, мемы, картинки с текстом",
+          "домашние животные в помещении"
+        ]
+      },
+      "cv": {
+        "prompt_language": "en",
+        "topic": {
+          "positive_prompts": [
+            "a photo of a natural landscape",
+            "a photo of a forest",
+            "a photo of mountains",
+            "a photo of a lake or a river",
+            "a photo of a sea shore",
+            "a photo of a waterfall",
+            "a photo of a wild animal in nature",
+            "a photo of a bird in the wild",
+            "a close-up photo of a flower or a plant",
+            "a photo of the sky with clouds or a sunset"
+          ],
+          "negative_prompts": [
+            "a photo of a city street",
+            "a photo of a room interior",
+            "a selfie",
+            "a portrait photo of a person",
+            "a photo of food",
+            "a photo of a car",
+            "a photo of a pet indoors",
+            "a screenshot",
+            "a meme with text",
+            "a product photo"
+          ]
+        },
+        "prohibited": [
+          {
+            "category": "violence",
+            "prompts": [
+              "a photo of blood and injuries",
+              "a photo of a dead animal",
+              "a photo of a weapon",
+              "a photo of a violent fight"
+            ],
+            "action": "review"
+          },
+          {
+            "category": "personal_data",
+            "prompts": [
+              "a photo of an identity document",
+              "a photo of a car license plate",
+              "a photo of a screen with personal information"
+            ],
+            "action": "review"
+          },
+          {
+            "category": "spam",
+            "prompts": [
+              "an advertisement banner",
+              "a QR code",
+              "an image with a lot of text",
+              "a brand logo"
+            ],
+            "action": "review"
+          },
+          {
+            "category": "minors",
+            "prompts": [
+              "a photo of a child",
+              "a photo of children playing"
+            ],
+            "action": "review"
+          }
+        ],
+        "thresholds": {
+          "calibrated": true,
+          "calibration_report": "docs/results/cv-thresholds-example.md",
+          "topic_approve_min": 0.8,
+          "topic_reject_max": 0.3,
+          "nsfw_reject_min": 0.9,
+          "nsfw_review_min": 0.5,
+          "prohibited_review_min": 0.6
+        }
+      },
+      "duplicates": {
+        "scope": "campaign",
+        "allow_after_rejection": false
+      }
+    }
+  }
+}
