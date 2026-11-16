@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/media.completed.schema.json",
+  "title": "media.completed",
+  "allOf": [
+    {
+      "$ref": "envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "event_type": {
+      "const": "media.completed"
+    },
+    "producer": {
+      "const": "media-worker"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "media_profile_version",
+        "worker_version",
+        "original",
+        "sanitized",
+        "metadata_removed",
+        "duration_ms"
+      ],
+      "properties": {
+        "asset_id": {
+          "$ref": "common.schema.json#/$defs/uuid"
+        },
+        "media_profile_version": {
+          "type": "string",
+          "pattern": "^media-v[0-9]+$"
+        },
+        "worker_version": {
+          "$ref": "common.schema.json#/$defs/version_tag"
+        },
+        "original": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "detected_format",
+            "width",
+            "height",
+            "frames",
+            "exif_orientation"
+          ],
+          "properties": {
+            "detected_format": {
+              "$ref": "../policies/media-profile.schema.json#/$defs/input_format"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "frames": {
+              "const": 1
+            },
+            "exif_orientation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8,
+              "description": "Значение тега Orientation (1 — без поворота), уже применённое к выходу."
+            }
+          }
+        },
+        "sanitized": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bucket",
+            "key",
+            "sha256",
+            "size_bytes",
+            "format",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "bucket": {
+              "const": "sanitized"
+            },
+            "key": {
+              "$ref": "common.schema.json#/$defs/object_key"
+            },
+            "sha256": {
+              "$ref": "common.schema.json#/$defs/sha256"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "format": {
+              "const": "jpeg"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "metadata_removed": {
+          "const": true
+        },
+        "duration_ms": {
+          "$ref": "common.schema.json#/$defs/duration_ms"
+        }
+      }
+    }
+  }
+}

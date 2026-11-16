@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/cv.requested.schema.json",
+  "title": "cv.requested",
+  "allOf": [
+    {
+      "$ref": "envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "event_type": {
+      "const": "cv.requested"
+    },
+    "producer": {
+      "const": "backend"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "image",
+        "policy"
+      ],
+      "properties": {
+        "asset_id": {
+          "$ref": "common.schema.json#/$defs/uuid"
+        },
+        "image": {
+          "$ref": "common.schema.json#/$defs/sanitized_ref"
+        },
+        "policy": {
+          "$ref": "../policies/campaign-policy.schema.json",
+          "description": "Полный снимок политики кампании. CV не читает политику из других мест."
+        }
+      }
+    }
+  }
+}

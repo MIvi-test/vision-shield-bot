@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "event_id": "c94565fa-dc75-52a5-a043-f88c4d3d2642",
+  "event_type": "media.rejected",
+  "correlation_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "submission_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "operation_id": "3e4f5a6b-7c8d-4e9f-a0b1-c2d3e4f5a6b7",
+  "causation_id": "8c9d0e1f-2a3b-4c4d-9e5f-6a7b8c9d0e1f",
+  "occurred_at": "2026-11-13T10:05:00.080Z",
+  "producer": "media-worker",
+  "payload": {
+    "asset_id": "b7d1f0e2-3c4a-4b5d-9e6f-0a1b2c3d4e5f",
+    "media_profile_version": "media-v0",
+    "worker_version": "media-worker-0.1.0",
+    "reason_codes": [
+      "UNSUPPORTED_FORMAT"
+    ],
+    "detected_format": "gif",
+    "duration_ms": 3
+  }
+}

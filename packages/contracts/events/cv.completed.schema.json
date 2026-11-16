@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/cv.completed.schema.json",
+  "title": "cv.completed",
+  "allOf": [
+    {
+      "$ref": "envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "event_type": {
+      "const": "cv.completed"
+    },
+    "producer": {
+      "const": "cv-worker"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "policy_version",
+        "worker_version",
+        "preprocessing_version",
+        "models",
+        "scores",
+        "recommended_decision",
+        "reason_codes",
+        "duration_ms"
+      ],
+      "properties": {
+        "asset_id": {
+          "$ref": "common.schema.json#/$defs/uuid"
+        },
+        "policy_version": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,47}-v[0-9]+$"
+        },
+        "worker_version": {
+          "$ref": "common.schema.json#/$defs/version_tag"
+        },
+        "preprocessing_version": {
+          "$ref": "common.schema.json#/$defs/version_tag"
+        },
+        "models": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "topic",
+            "nsfw"
+          ],
+          "properties": {
+            "topic": {
+              "$ref": "common.schema.json#/$defs/model_ref"
+            },
+            "nsfw": {
+              "$ref": "common.schema.json#/$defs/model_ref"
+            }
+          }
+        },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "topic",
+            "nsfw",
+            "prohibited"
+          ],
+          "properties": {
+            "topic": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "nsfw": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "prohibited": {
+              "type": "object",
+              "additionalProperties": false,
+              "propertyNames": {
+                "enum": [
+                  "violence",
+                  "personal_data",
+                  "spam",
+                  "minors"
+                ]
+              },
+              "patternProperties": {
+                "^.*$": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          },
+          "description": "Scores — относительные меры сходства, не вероятность правильного решения."
+        },
+        "recommended_decision": {
+          "enum": [
+            "approved",
+            "rejected",
+            "review_required"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "common.schema.json#/$defs/cv_reason_code"
+          }
+        },
+        "duration_ms": {
+          "$ref": "common.schema.json#/$defs/duration_ms"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "recommended_decision": {
+                "const": "approved"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason_codes": {
+                "const": [
+                  "TOPIC_MATCH"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
