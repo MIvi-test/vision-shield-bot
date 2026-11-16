@@ -15,13 +15,13 @@
 ### Добавлено
 
 - S1-15: первый срез набора «Природа» — 77 изображений с Wikimedia Commons
-  (21 `suitable`, 43 `off_topic`, 13 `borderline`) для проверки моделей в S1-09.
+  (22 `suitable`, 42 `off_topic`, 13 `borderline`) для проверки моделей в S1-09.
   В Git только манифест `datasets/nature/manifest.jsonl` с источником, лицензией,
   автором и SHA-256; изображения скачиваются `datasets/tools/fetch_dataset.py`
   со сверкой хешей. Скрипты поиска кандидатов и сборки манифеста, JSON Schema
-  строки и тесты без сети. В манифест добавлено поле `file_url`. Весь срез —
-  `tuning`; контрольная часть собирается в S2-09. Подробности —
-  [datasets/README.md](datasets/README.md).
+  строки и тесты без сети. В манифест и `docs/dataset.md` §5 добавлено поле
+  `file_url`. Весь срез — `tuning`; контрольная часть собирается в S2-09.
+  Подробности — [datasets/README.md](datasets/README.md).
 - S1-10: политика модерации v0 ([docs/policy.md](docs/policy.md)) и критерии
   разметки ([docs/dataset.md](docs/dataset.md)). Машиночитаемые файлы в
   `packages/contracts/policies/`: media-профиль `media-v0` (JPEG/PNG/WEBP по

@@ -19,7 +19,7 @@ uv run python datasets/tools/fetch_dataset.py datasets/nature/manifest.jsonl
 
 | Набор | Тема | Строк | `suitable` | `off_topic` | `borderline` | Авторов |
 | --- | --- | --- | --- | --- | --- | --- |
-| [`nature/`](nature/manifest.jsonl) | «Природа» (`nature-v0`) | 77 | 21 | 43 | 13 (из них `nsfw` — 1, `spam` — 1) | 48 |
+| [`nature/`](nature/manifest.jsonl) | «Природа» (`nature-v0`) | 77 | 22 | 42 | 13 (из них `spam` — 1) | 48 |
 
 Это первый срез для проверки моделей на CPU (S1-09). Класса `prohibited` в нём нет. Все строки — `split: "tuning"`, см. «Разделение данных».
 
@@ -47,9 +47,7 @@ data/                     # вне Git
 {"id": "nat-0001", "sha256": "…", "label": "suitable", "category": null, "split": "tuning", "source_url": "https://commons.wikimedia.org/wiki/File:…", "file_url": "https://upload.wikimedia.org/wikipedia/commons/…", "license": "CC-BY-SA-3.0", "author": "…", "model_release": null, "labeled_by": "dev4", "reviewed_by": null, "notes": ""}
 ```
 
-Поля описаны в `docs/dataset.md` §5. Сверх него добавлено одно поле:
-
-- `file_url` — прямая ссылка на оригинал файла без параметров запроса. По ней качает скрипт. `source_url` — страница файла на Commons с автором и лицензией, она для человека.
+Поля описаны в `docs/dataset.md` §5. `source_url` — страница файла на Commons с автором и лицензией, для человека; `file_url` — прямая ссылка на оригинал без параметров запроса, по ней качает скрипт.
 
 Схема дополнительно требует: `sha256` — 64 строчных шестнадцатеричных символа; `license` — идентификатор SPDX из разрешённых; `author` — текст без HTML; `model_release` — только `true` или `null`; `reviewed_by` заполнен у `borderline` и `prohibited`; категория есть только у `borderline` и `prohibited`. Тест также проверяет, что `id` и `sha256` не повторяются, `id` идут подряд и один автор не попадает одновременно в `tuning` и `control`.
 
