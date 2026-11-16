@@ -445,12 +445,13 @@ def main() -> int:
             "--threads",
             str(args.threads),
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+        # stderr не перехватываем: прогресс скачивания весов виден в консоли.
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, text=True, encoding="utf-8")
         lines = [ln for ln in proc.stdout.splitlines() if ln.startswith("RESULT ")]
         if lines:
             result = json.loads(lines[-1][len("RESULT ") :])
         else:
-            tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
+            tail = (proc.stdout or "").strip().splitlines()[-3:]
             result = {
                 "model": name,
                 "error": " / ".join(tail) or f"код {proc.returncode}",
