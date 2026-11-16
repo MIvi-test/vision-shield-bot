@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "event_id": "d60628ca-3802-520e-9804-ee2a7b60d3a8",
+  "event_type": "media.failed",
+  "correlation_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "submission_id": "5b0e4c3a-2f1d-4a8e-9c6b-7d3e1f2a4b5c",
+  "operation_id": "e5f6a7b8-c9d0-4e1f-a2b3-c4d5e6f7a8b9",
+  "causation_id": "f6a7b8c9-d0e1-4f2a-b3c4-d5e6f7a8b9c0",
+  "occurred_at": "2026-11-13T11:02:10Z",
+  "producer": "media-worker",
+  "payload": {
+    "asset_id": "a1c2e3f4-0b1d-4e2f-8a3b-5c6d7e8f9012",
+    "worker_version": "media-worker-0.1.0",
+    "error": {
+      "code": "STORAGE_UNAVAILABLE",
+      "detail": "object storage unavailable, retry attempts exhausted"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/events/envelope.schema.json",
+  "title": "Event envelope v1",
+  "description": "Общий конверт всех событий очередей. Бинарные файлы, токены и URL в событие не кладутся.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_type",
+    "correlation_id",
+    "submission_id",
+    "operation_id",
+    "causation_id",
+    "occurred_at",
+    "producer",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "event_id": {
+      "description": "ID события; не меняется при повторной доставке.",
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "event_type": {
+      "enum": [
+        "media.requested",
+        "media.completed",
+        "media.rejected",
+        "media.failed",
+        "cv.requested",
+        "cv.completed",
+        "cv.failed"
+      ]
+    },
+    "correlation_id": {
+      "description": "Сквозной ID для трассировки; в v1 равен submission_id.",
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "submission_id": {"$ref": "common.schema.json#/$defs/uuid"},
+    "operation_id": {
+      "description": "Логический запуск обработки. Новая проверка того же файла получает новый ID.",
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "causation_id": {
+      "description": "event_id события, вызвавшего это. Для задачи — ID outbox-записи Backend, для результата — event_id задачи.",
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "occurred_at": {"$ref": "common.schema.json#/$defs/timestamp"},
+    "producer": {"enum": ["backend", "media-worker", "cv-worker"]},
+    "payload": {"type": "object"}
+  }
+}
