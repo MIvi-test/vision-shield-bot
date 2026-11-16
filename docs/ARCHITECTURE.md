@@ -138,6 +138,7 @@ apps/media-worker/         # Dev3: проверка и очистка файло
 apps/cv-worker/            # Dev3: модель и обработчик
 apps/moderator-ui/         # React
 packages/contracts/        # схемы сообщений и фикстуры
+datasets/                  # Dev4: манифесты размеченных изображений и скрипты загрузки; файлы — в data/, вне Git
 infra/                     # Compose-конфигурация, брокер, мониторинг
 tests/                     # интеграционные и контрактные сценарии
 docs/ARCHITECTURE.md       # обзор архитектуры (этот документ)

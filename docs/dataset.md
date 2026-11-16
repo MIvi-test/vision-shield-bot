@@ -74,9 +74,10 @@
 Изображения не коммитятся в репозиторий, если их лицензия этого не позволяет или они велики. В репозитории хранится манифест, по которому набор воспроизводимо скачивается (S1-15). Одна строка JSONL — одно изображение:
 
 ```json
-{"id": "nat-0001", "sha256": "…", "label": "suitable", "category": null, "split": "tuning", "source_url": "https://…", "license": "CC-BY-4.0", "author": "…", "model_release": null, "labeled_by": "dev4", "reviewed_by": "dev3", "notes": ""}
+{"id": "nat-0001", "sha256": "…", "label": "suitable", "category": null, "split": "tuning", "source_url": "https://…", "file_url": "https://…", "license": "CC-BY-4.0", "author": "…", "model_release": null, "labeled_by": "dev4", "reviewed_by": "dev3", "notes": ""}
 ```
 
+- `source_url` — страница изображения у источника с автором и лицензией, для человека. `file_url` — прямая ссылка на сам файл без параметров запроса, по ней качает скрипт загрузки.
 - `split`: `tuning` (настройка порогов) или `control` (контрольная оценка).
 - `category`: обязательна для `prohibited`, необязательна для `borderline` (§1).
 - `model_release`: `true` — есть release изображённого; `null` — в кадре нет узнаваемых людей. Строка с узнаваемым человеком без release (`false`) в набор не включается.

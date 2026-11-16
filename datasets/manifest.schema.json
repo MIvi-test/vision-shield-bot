@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.vision-shield-bot.example/datasets/manifest.schema.json",
+  "title": "Dataset manifest row",
+  "description": "Одна строка JSONL-манифеста набора изображений. Правила разметки — docs/dataset.md; изображения не хранятся в Git и скачиваются по file_url со сверкой sha256.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "sha256",
+    "label",
+    "category",
+    "split",
+    "source_url",
+    "file_url",
+    "license",
+    "author",
+    "model_release",
+    "labeled_by",
+    "reviewed_by",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]{3}-[0-9]{4}$",
+      "description": "Префикс темы и порядковый номер, например nat-0001."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 оригинального файла в нижнем регистре."
+    },
+    "label": {
+      "enum": ["suitable", "off_topic", "borderline", "prohibited"]
+    },
+    "category": {
+      "enum": [null, "nsfw", "violence", "personal_data", "spam", "minors"],
+      "description": "Обязательна для prohibited, необязательна для borderline, null для остальных меток."
+    },
+    "split": {
+      "enum": ["tuning", "control"]
+    },
+    "source_url": {
+      "type": "string",
+      "pattern": "^https://commons\\.wikimedia\\.org/wiki/File:[^?#]+$",
+      "description": "Страница файла на Wikimedia Commons с лицензией и автором."
+    },
+    "file_url": {
+      "type": "string",
+      "pattern": "^https://upload\\.wikimedia\\.org/wikipedia/commons/[^?#]+$",
+      "description": "Прямая ссылка на оригинал без параметров запроса."
+    },
+    "license": {
+      "type": "string",
+      "pattern": "^(CC0-1\\.0|PDM-1\\.0|CC-BY(-SA)?-(1\\.0|2\\.0|2\\.5|3\\.0|4\\.0))$",
+      "description": "Идентификатор SPDX. Допустимы только CC0, Public Domain Mark, CC BY и CC BY-SA."
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[^<>]+$",
+      "description": "Имя автора обычным текстом, без HTML."
+    },
+    "model_release": {
+      "enum": [true, null],
+      "description": "true — есть release изображённого; null — узнаваемых людей нет. Строки с false в набор не включаются."
+    },
+    "labeled_by": {
+      "type": "string",
+      "pattern": "^dev[1-4]$"
+    },
+    "reviewed_by": {
+      "type": ["string", "null"],
+      "pattern": "^dev[1-4]$"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"label": {"const": "prohibited"}}},
+      "then": {
+        "properties": {
+          "category": {"type": "string"},
+          "reviewed_by": {"type": "string"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"label": {"const": "borderline"}}},
+      "then": {"properties": {"reviewed_by": {"type": "string"}}}
+    },
+    {
+      "if": {"properties": {"label": {"enum": ["suitable", "off_topic"]}}},
+      "then": {"properties": {"category": {"const": null}}}
+    }
+  ]
+}
