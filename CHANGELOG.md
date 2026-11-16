@@ -14,13 +14,17 @@
 
 ### Добавлено
 
-- S1-08: контракты событий media/CV в  —
-  JSON Schema конверта и семи событий (,
-  ), 10 связанных примеров и README с правилами:
+- S1-08: контракты событий media/CV в `packages/contracts/events/` —
+  JSON Schema конверта и семи событий (`media.requested/completed/rejected/failed`,
+  `cv.requested/completed/failed`), 10 связанных примеров и README с правилами:
   детерминированный ID результата, один финальный результат на операцию,
   повторяемые ошибки, ключи объектов и права на бакеты, снимки политики.
-   проверяет схемы, цепочки примеров,
+  `tests/test_event_contracts.py` проверяет схемы, цепочки примеров,
   согласованность с кодами причин и отклонение небезопасных сообщений.
+- S1-19 (Dev1): независимые GitHub ruleset для интеграционной `develop`
+  и релизной `main`, обязательные checks GitHub Actions, CodeQL merge
+  protection и негативные PR-проверки. Конфигурация хранится в GitHub;
+  [отчёт](docs/results/s1-19-progress.md) содержит подтверждения и ограничения.
 - S1-10: политика модерации v0 ([docs/policy.md](docs/policy.md)) и критерии
   разметки ([docs/dataset.md](docs/dataset.md)). Машиночитаемые файлы в
   `packages/contracts/policies/`: media-профиль `media-v0` (JPEG/PNG/WEBP по
