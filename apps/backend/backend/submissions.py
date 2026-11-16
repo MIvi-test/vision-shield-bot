@@ -1,5 +1,6 @@
 """Sprint 1 domain operations. The caller owns the transaction."""
 
+import re
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -21,8 +22,10 @@ from backend.database import (
 
 def register_campaign(session: Session, slug: str, version: str, text: str) -> UUID:
     """Explicit administrative setup; a stored rules version is immutable."""
-    if not slug or len(slug) > 64:
-        raise ValueError("Slug кампании должен содержать от 1 до 64 символов")
+    if re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", slug) is None:
+        raise ValueError(
+            "Slug кампании: 1–64 символа, строчные латинские буквы, цифры и дефис"
+        )
     if not version or len(version) > 64 or any(c.isspace() for c in version):
         raise ValueError("Версия правил: 1–64 символа без пробелов")
     if not text.strip() or len(text) > 2400:

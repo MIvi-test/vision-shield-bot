@@ -1,3 +1,5 @@
+import copy
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -16,7 +18,7 @@ from backend.database import (
     User,
 )
 from backend.durable_polling import DurablePollingBot
-from backend.inbox import InboxStore, ReceivedMessage
+from backend.inbox import InboxStore, ReceivedMessage, normalize_message
 from backend.submissions import register_campaign
 from max_emulator import LOCAL_TOKEN
 from maxapi import Bot
@@ -63,6 +65,65 @@ def receive(store, text="", *, photo=False, user=2001, mid=None, delivered=True)
 def count(engine, model):
     with Session(engine) as session:
         return session.scalar(select(func.count()).select_from(model))
+
+
+def attachment_event(kind, amount=1):
+    path = Path(__file__).parents[1] / "packages/contracts/max/fixtures"
+    raw = json.loads((path / f"updates-{kind}.json").read_text())["body"]["updates"][0]
+    attachments = raw["message"]["body"]["attachments"]
+    raw["message"]["body"]["attachments"] = [
+        copy.deepcopy(attachments[0]) for _ in range(amount)
+    ]
+    return raw
+
+
+@pytest.mark.parametrize("kind", ["image", "file"])
+def test_normalize_media_candidates(kind):
+    message = normalize_message(attachment_event(kind))
+    assert message.has_photo
+    assert message.media_count == 1
+    assert "example.invalid" not in repr(message)
+    assert "synthetic-token" not in repr(message)
+
+
+@pytest.mark.parametrize("kind", ["image", "file"])
+def test_multiple_attachments_do_not_create_submission(db_engine, campaign_id, kind):
+    store = store_for(db_engine, campaign_id)
+    raw = attachment_event(kind, 3)
+    # A caption must not turn a rejected group into a consent command.
+    raw["message"]["body"]["text"] = "/agree v1"
+    message = normalize_message(raw)
+    store.save_batch(0, 1, [message])
+    store.save_batch(1, 2, [message])
+    assert store.marker() == 2
+    reply = store.claim_reply()
+    assert reply is not None
+    assert "по одному" in reply.text
+    store.finish_reply(reply.event_id, "sent")
+    assert store.claim_reply() is None
+    assert count(db_engine, Submission) == 0
+    assert count(db_engine, Consent) == 0
+    assert count(db_engine, AuditEvent) == 0
+
+
+def test_document_creates_candidate_without_download(db_engine, campaign_id):
+    store = store_for(db_engine, campaign_id)
+    message = normalize_message(attachment_event("file"))
+    store.save_batch(0, 1, [message])
+    store.save_batch(1, 2, [message])
+    with Session(db_engine) as session:
+        submission = session.scalars(select(Submission)).one()
+        assert submission.status == "awaiting_consent"
+        assert submission.version == 1
+        assert submission.consent_id is None
+    assert count(db_engine, AuditEvent) == 1
+
+
+@pytest.mark.parametrize("slug", ["Uppercase", "has space", "../bad", "-first", ""])
+def test_campaign_slug_matches_policy(db_engine, slug):
+    with Session(db_engine) as session, session.begin():
+        with pytest.raises(ValueError, match="Slug"):
+            register_campaign(session, slug, "v1", "Тестовые правила")
 
 
 def test_upgrade_preserves_existing_inbox(db_engine):

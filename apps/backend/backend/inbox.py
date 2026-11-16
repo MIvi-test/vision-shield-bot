@@ -23,6 +23,7 @@ class ReceivedMessage:
     has_photo: bool
     reply_text: str | None
     sender_id: int | None = None
+    media_count: int = 0
 
 
 def normalize_message(raw_event: dict) -> ReceivedMessage:
@@ -31,7 +32,10 @@ def normalize_message(raw_event: dict) -> ReceivedMessage:
     if message.body is None or not message.body.mid:
         raise ValueError("У события нет идентификатора сообщения")
     text = message.body.text or ""
-    has_photo = any(a.type == "image" for a in message.body.attachments or [])
+    media_count = sum(
+        a.type in {"image", "file"} for a in message.body.attachments or []
+    )
+    has_photo = media_count == 1
     can_reply = (
         message.recipient.chat_type == ChatType.DIALOG
         and message.recipient.chat_id is not None
@@ -43,8 +47,15 @@ def normalize_message(raw_event: dict) -> ReceivedMessage:
         chat_id=message.recipient.chat_id if can_reply else None,
         text=text if can_reply else "",
         has_photo=has_photo if can_reply else False,
-        reply_text=choose_reply(text, has_photo=has_photo) if can_reply else None,
+        reply_text=(
+            "Присылайте по одному фото или файлу в сообщении. Заявка не создана."
+            if media_count > 1
+            else choose_reply(text, has_photo=has_photo)
+        )
+        if can_reply
+        else None,
         sender_id=message.sender.user_id if can_reply and message.sender else None,
+        media_count=media_count if can_reply else 0,
     )
 
 
@@ -127,6 +138,7 @@ class InboxStore:
                     event_id is not None
                     and self.campaign_id is not None
                     and message.reply_text is not None
+                    and message.media_count <= 1
                 ):
                     event = session.get(InboxEvent, event_id)
                     if event is None:
