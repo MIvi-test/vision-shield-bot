@@ -14,6 +14,10 @@
 
 ### Добавлено
 
+- Dev2: уточнения S1-06 по ревью — один image/file на заявку, ответ без заявки
+  для группы вложений, проверка slug кампании по формату политики, документация
+  принятых решений и справочник Backend `apps/backend/CODE_GUIDE.md`.
+
 - S1-08: контракты событий media/CV в `packages/contracts/events/` —
   JSON Schema конверта и семи событий (`media.requested/completed/rejected/failed`,
   `cv.requested/completed/failed`), 10 связанных примеров и README с правилами:
