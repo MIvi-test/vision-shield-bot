@@ -2,12 +2,12 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-06 and its S1-07 decisions were approved and merged in PR #12; review follow-ups are documented in docs/results/s1-06-progress.md. Workers, panel API/frontend manifests, and Compose are not implemented yet. See apps/backend/README.md and docs/results/s1-06-progress.md.
+This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-06 and its S1-07 decisions were approved and merged in PR #12; review follow-ups are documented in docs/results/s1-06-progress.md. Workers and panel API/frontend manifests are not implemented yet. Initial Compose runs PostgreSQL, RabbitMQ, the emulator, migrations, HTTP Backend and the inbox bot; broker delivery and UI integration still await S1-17/S1-11. See docs/operations.md and docs/results/s1-03-progress.md. See apps/backend/README.md and docs/results/s1-06-progress.md.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.
 - `packages/contracts/`: planned event schemas, panel OpenAPI, moderation policies, and anonymized MAX fixtures.
-- `infra/`: infrastructure configuration; the planned `compose.yaml` belongs at repository root.
+- `infra/`: infrastructure configuration; the initial `compose.yaml` is at repository root; see docs/operations.md for setup and emulator-reset limitations.
 - `tests/`: planned integration and contract scenarios. Keep test images synthetic or openly licensed and record their sources.
 
 Create directories as implementation begins.
@@ -19,10 +19,11 @@ When changing Backend code, update `apps/backend/CODE_GUIDE.md` alongside it so 
 - `cp .env.example .env`: prepare local configuration; fill credentials locally.
 - `git diff --check`: check whitespace before submitting changes.
 - `git status --short`: inspect changed and untracked files.
+- `python3 infra/scripts/smoke_compose.py`: build and exercise a disposable Compose project (Compose 2.24.4+); no local .env needed. Only this test project's containers/network/volumes are removed; redacted diagnostics remain in tmp/compose-smoke. CI runs the same command in Compose smoke.
 - `uv lock --check` and `uv audit --locked`: validate and audit all locked Python dependencies, including development groups, using uv 0.13.6.
 - `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
-Launch the standalone emulator with `uv run uvicorn max_emulator:create_app --factory --app-dir apps/max-emulator --host 127.0.0.1 --port 8081`; see `apps/max-emulator/README.md`. Compose arrives in S1-03. Install Python dependencies with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check`, and `uv run pytest`. SDK integration tests bind only to a random localhost port. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
+Launch the standalone emulator with `uv run uvicorn max_emulator:create_app --factory --app-dir apps/max-emulator --host 127.0.0.1 --port 8081`; see `apps/max-emulator/README.md`. Initial Compose is available for S1-03; configure local passwords and follow docs/operations.md. Full acceptance awaits S1-11/S1-17. Never reuse MAX_SOURCE_ID after resetting emulator history; stop the bot before the reset and handle unresolved replies separately. Install Python dependencies with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check`, and `uv run pytest`. SDK integration tests bind only to a random localhost port. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
 
 ## Coding Style & Naming Conventions
 
