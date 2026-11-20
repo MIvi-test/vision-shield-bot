@@ -53,6 +53,13 @@ CI запускает Ruff и ty всегда, pytest — после появл�
 manifest приводит к ошибке CI. При отсутствии manifest этапы пропускаются
 с записью в summary. Тесты UI и `check:api` подключаются после их реализации.
 
+`Frontend build` также собирает образ панели на Caddy и выполняет
+`python3 infra/scripts/smoke_moderator_ui.py` на Python 3.14. Проверяются
+read-only запуск без root, статика и SPA fallback, кеширование, заголовки,
+proxy API/webhook и конфигурация публичного HTTPS. Smoke использует Backend
+stub и удаляет свои контейнеры, сеть и теги образов. Реальный выпуск
+сертификата и доставка MAX проверяются отдельно на стенде с доменом.
+
 При добавлении библиотек Python обновляйте `pyproject.toml` и `uv.lock`
 в одном PR. CI использует `uv sync --locked`: рассинхронизация этих файлов
 приводит к ошибке. CI поднимает PostgreSQL 18 для Backend-тестов.

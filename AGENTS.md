@@ -19,6 +19,7 @@ When changing Backend code, update `apps/backend/CODE_GUIDE.md` alongside it so 
 - `cp .env.example .env`: prepare local configuration; fill credentials locally.
 - `git diff --check`: check whitespace before submitting changes.
 - `git status --short`: inspect changed and untracked files.
+- `python3 infra/scripts/smoke_moderator_ui.py`: build and check the panel's Caddy container with a disposable Backend stub (Docker and Python 3.14). CI runs it in Frontend build; public certificate issuance needs a real domain and is not tested here.
 - `uv lock --check` and `uv audit --locked`: validate and audit all locked Python dependencies, including development groups, using uv 0.13.6.
 - `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
