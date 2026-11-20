@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-06 and its S1-07 decisions were approved and merged in PR #12; review follow-ups are documented in docs/results/s1-06-progress.md. Workers, panel API/frontend manifests, and Compose are not implemented yet. See apps/backend/README.md and docs/results/s1-06-progress.md.
+This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-06 and its S1-07 decisions were approved and merged in PR #12; review follow-ups are documented in docs/results/s1-06-progress.md. Workers, panel API, and Compose are not implemented yet; the moderator-ui frontend scaffold (React/TypeScript, S1-11 in progress) exists with a lockfile and build script. See apps/backend/README.md, apps/moderator-ui/README.md, and docs/results/s1-06-progress.md.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.
@@ -22,7 +22,7 @@ When changing Backend code, update `apps/backend/CODE_GUIDE.md` alongside it so 
 - `uv lock --check` and `uv audit --locked`: validate and audit all locked Python dependencies, including development groups, using uv 0.13.6.
 - `gitleaks git . --log-opts="--all" --redact --no-banner --exit-code=1`: scan committed history with Gitleaks 8.30.1.
 
-Launch the standalone emulator with `uv run uvicorn max_emulator:create_app --factory --app-dir apps/max-emulator --host 127.0.0.1 --port 8081`; see `apps/max-emulator/README.md`. Compose arrives in S1-03. Install Python dependencies with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check`, and `uv run pytest`. SDK integration tests bind only to a random localhost port. Frontend CI will run `npm ci` and `npm run build` in `apps/moderator-ui` once its package manifest exists; the lockfile and build script must arrive with it.
+Launch the standalone emulator with `uv run uvicorn max_emulator:create_app --factory --app-dir apps/max-emulator --host 127.0.0.1 --port 8081`; see `apps/max-emulator/README.md`. Compose arrives in S1-03. Install Python dependencies with `uv sync --locked`, then use `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check`, and `uv run pytest`. SDK integration tests bind only to a random localhost port. Frontend CI runs `npm ci` and `npm run build` in `apps/moderator-ui` on Node 24; dependency versions are exact and committed with `package-lock.json`.
 
 ## Coding Style & Naming Conventions
 

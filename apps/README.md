@@ -8,6 +8,6 @@
 | [max-emulator/](max-emulator/README.md) | Эмулятор MAX v0: polling, текст/фото и сохранение ответов | Dev1 |
 | `media-worker/` | Проверка и очистка изображений | Dev3 |
 | `cv-worker/` | Анализ изображений | Dev3 |
-| `moderator-ui/` | Панель модератора | Dev4 |
+| [moderator-ui/](moderator-ui/README.md) | Панель модератора: каркас React/TypeScript, экраны в работе (S1-11) | Dev4 |
 
 Архитектура и границы компонентов — в [ARCHITECTURE.md](../docs/ARCHITECTURE.md).

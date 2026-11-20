@@ -14,6 +14,11 @@
 
 ### Добавлено
 
+- S1-11: каркас панели модератора в `apps/moderator-ui/` — React 19,
+  TypeScript 7, Vite 8, oxlint; точные версии зависимостей и
+  `package-lock.json`, сборка `npm run build` с проверкой типов. Экранов
+  пока нет: вход и список заявок — следующие этапы. Job `Frontend build`
+  в CI теперь выполняет реальную сборку панели.
 - S1-15: первый срез набора «Природа» — 77 изображений с Wikimedia Commons
   (22 `suitable`, 42 `off_topic`, 13 `borderline`) для проверки моделей в S1-09.
   В Git только манифест `datasets/nature/manifest.jsonl` с источником, лицензией,
