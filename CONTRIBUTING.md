@@ -16,12 +16,12 @@ Workflow `.github/workflows/ci.yml` запускается на каждый pus
 а также вручную. Имена проверок: `Python checks` и `Frontend build`.
 Gitleaks работает отдельным workflow с именем проверки `Gitleaks`.
 Workflow `.github/workflows/security.yml` добавляет `Dependency audit`,
-`CodeQL (python)` и `CodeQL (actions)` на каждый PR, push в `main`/`develop`,
+`CodeQL (python)`, `CodeQL (actions)` и `CodeQL (javascript-typescript)`
+на каждый PR, push в `main`/`develop`,
 еженедельно по понедельникам в 05:17 UTC и при ручном запуске.
 
-Добавлены проверки Ruff, типов через ty, запуск pytest и сборка фронтенда.
-Тесты эмулятора уже выполняются. До появления фронтенда его сборка
-пропускается автоматически. Для фронтенда настроена сборка;
+Добавлены проверки Ruff, типов через ty, запуск pytest, lint и сборка фронтенда.
+Тесты эмулятора уже выполняются. Каркас панели собирается в `Frontend build`;
 тестирование UI пока не добавлено.
 
 Python: версия 3.14, зависимости разработки задаются в корневом
@@ -47,11 +47,11 @@ CI запускает Ruff и ty всегда, pytest — после появл�
 это не подтверждение прохождения тестов. Ошибки обнаружения и выполнения
 существующих тестов приводят к ошибке CI.
 
-После появления `apps/moderator-ui/package.json` CI выполняет `npm ci`
-и `npm run build` в этом каталоге на Node.js 24. Dev4 должен добавить
-`package-lock.json` и script `build` вместе с приложением. Отсутствие lock-файла
-или команды сборки при наличии manifest приводит к ошибке CI.
-До появления manifest сборка явно пропускается с записью в summary.
+При наличии `apps/moderator-ui/package.json` CI выполняет `npm ci`,
+`npm run lint` и `npm run build` в этом каталоге на Node.js 24. Сборка включает
+проверку типов (`tsc -b`). Отсутствие lock-файла или нужного script при наличии
+manifest приводит к ошибке CI. При отсутствии manifest этапы пропускаются
+с записью в summary. Тесты UI и `check:api` подключаются после их реализации.
 
 При добавлении библиотек Python обновляйте `pyproject.toml` и `uv.lock`
 в одном PR. CI использует `uv sync --locked`: рассинхронизация этих файлов
@@ -83,12 +83,28 @@ uv audit --locked
 `pip-audit` в зависимости проекта не добавляется. Аудит известных уязвимостей
 не заменяет проверку происхождения пакетов и анализ кода.
 
-CodeQL анализирует Python и GitHub Actions с `security-extended`, без сборки
+В той же job `Dependency audit` проверяются зависимости панели на Node.js 24:
+
+```bash
+cd apps/moderator-ui
+npm ci --ignore-scripts --no-audit --include=dev
+npm audit --audit-level=high --include=dev
+```
+
+`npm ci` проверяет согласованность manifest и lock-файла, устанавливая также
+dev-зависимости без lifecycle scripts. Отдельный `npm audit` проверяет весь
+набор, включая инструменты сборки; high/critical-находки и ошибки сервиса
+завершают job с ошибкой. Low/moderate остаются в отчёте.
+Автоматическое исправление зависимостей не выполняется.
+
+CodeQL анализирует Python, GitHub Actions и JavaScript/TypeScript
+с `security-extended`, без сборки
 или установки зависимостей проекта. Отчёты загружаются в Code scanning;
 для этой job выдано `security-events: write`, остальные job имеют только
 `contents: read`. Используется обычный `pull_request`, без `pull_request_target`.
 Все используемые Actions закреплены полными SHA с версией в комментарии.
-При появлении frontend-кода к матрице CodeQL нужно добавить JavaScript/TypeScript.
+Для JavaScript/TypeScript настроен Node.js 24; установка npm-зависимостей
+и сборка панели для анализа не требуются.
 
 Для CodeQL требуется доступный Code scanning (в публичном репозитории доступен)
 и advanced setup. Если в настройках включён default setup, его нужно заменить
@@ -160,8 +176,11 @@ squash или rebase merge. В `main` этого требования нет: р
 
 Описание настройки CodeQL — в
 [документации GitHub](https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/manage-your-configuration/set-merge-protection).
-`Frontend build` уже обязателен, но до появления приложения сообщает
-о пропуске сборки. Это ограничение, а не подтверждение сборки панели;
-реальный прогон остаётся за S1-11/S1-16. При появлении UI нужно добавить
-JavaScript/TypeScript в CodeQL и проверить соответствующий обязательный check.
+`Frontend build` уже обязателен и выполняет lint и сборку каркаса панели.
+Приёмка экранов и интеграции остаётся за S1-11/S1-16.
+Новый `CodeQL (javascript-typescript)` нужно отдельно добавить в required checks
+с источником GitHub Actions после успешного запуска. Для каждой защищаемой ветки
+сначала убедитесь, что соответствующие PR выполняют обновлённый workflow;
+иначе правило будет ждать отсутствующий check. Настройки ruleset этим PR
+не изменяются; включение и негативная проверка относятся к S1-19.
 S1-02 остаётся выполненной задачей Dev1.

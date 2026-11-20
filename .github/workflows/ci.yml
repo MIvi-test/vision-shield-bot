@@ -88,6 +88,11 @@ jobs:
         working-directory: apps/moderator-ui
         run: npm ci
 
+      - name: Lint frontend
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        working-directory: apps/moderator-ui
+        run: npm run lint
+
       - name: Build frontend
         if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
         working-directory: apps/moderator-ui
