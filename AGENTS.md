@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-06 and its S1-07 decisions were approved and merged in PR #12; review follow-ups are documented in docs/results/s1-06-progress.md. Workers and panel API/frontend manifests are not implemented yet. Initial Compose runs PostgreSQL, RabbitMQ, the emulator, migrations, HTTP Backend and the inbox bot; broker delivery and UI integration still await S1-17/S1-11. See docs/operations.md and docs/results/s1-03-progress.md. See apps/backend/README.md and docs/results/s1-06-progress.md.
+This MAX photo moderation service contains documentation, scaffolding, Python development tooling, CI, and the MAX emulator v0 with tests. Backend now has a mock MAX adapter, PostgreSQL inbox, migrations, consent/submission flow and audit; S1-06 and its S1-07 decisions were approved and merged in PR #12; review follow-ups are documented in docs/results/s1-06-progress.md. Workers and panel API/frontend manifests are not implemented yet. Initial Compose runs PostgreSQL, RabbitMQ, the emulator, migrations, HTTP Backend and the inbox bot; broker delivery and UI integration still await S1-17/S1-11. See docs/operations.md and infra/README.md. See apps/backend/README.md and docs/results/s1-06-progress.md.
 
 - `docs/ARCHITECTURE.md`: architecture entry point; `docs/sprints.md`: task IDs and acceptance criteria.
 - `apps/`: planned `backend/`, `max-emulator/`, `media-worker/`, `cv-worker/`, and `moderator-ui/` applications.
