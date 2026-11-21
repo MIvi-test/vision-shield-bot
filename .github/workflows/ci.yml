@@ -122,10 +122,25 @@ jobs:
         working-directory: apps/moderator-ui
         run: npm ci
 
+      - name: Lint frontend
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        working-directory: apps/moderator-ui
+        run: npm run lint
+
       - name: Build frontend
         if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
         working-directory: apps/moderator-ui
         run: npm run build
+
+      - name: Set up Python for container smoke
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14'
+
+      - name: Build and smoke-test frontend container
+        if: ${{ hashFiles('apps/moderator-ui/package.json') != '' }}
+        run: python3 infra/scripts/smoke_moderator_ui.py
 
       - name: Report missing frontend
         if: ${{ hashFiles('apps/moderator-ui/package.json') == '' }}
