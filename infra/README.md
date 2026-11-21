@@ -14,7 +14,12 @@ CPU/RAM/PID и ротация логов заданы по [плану ресу�
 
 Запуск, настройка кампании, перезапуск и ограничения описаны в
 [operations.md](../docs/operations.md#локальный-compose-s1-03).
-RabbitMQ пока не подключён к коду бота (S1-17), UI отсутствует (S1-11).
+Профиль `frontend` добавляет `moderator-ui`: Node собирает статику,
+Caddy раздаёт её на loopback-порту `PANEL_PORT` (8080) и проксирует API
+к `backend:8000`. Запуск: `docker compose up --build -d --wait moderator-ui backend`;
+для всего стенда — `docker compose --profile frontend up --build -d --wait`.
+Тома `panel-caddy-data` и `panel-caddy-config` сохраняют данные Caddy.
+RabbitMQ пока не подключён к коду бота (S1-17), панель остаётся каркасом без API (S1-11).
 Поэтому это основа стенда, а не полная приёмка S1-03/S1-16.
 
 `python3 infra/scripts/smoke_compose.py` собирает образы и проверяет
