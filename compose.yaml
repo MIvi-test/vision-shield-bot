@@ -1,0 +1,167 @@
+name: vision-shield
+
+x-logging: &logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-backend: &backend
+  image: vision-shield-backend:local
+  build:
+    context: .
+    target: backend
+  init: true
+  # Shared 1 GiB budget: HTTP 384 MiB + bot 384 MiB + migrations 256 MiB.
+  # See docs/results/capacity-planning.md, section 6.
+  cpus: 0.25
+  mem_limit: 384m
+  memswap_limit: 384m
+  pids_limit: 128
+  logging: *logging
+  read_only: true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  environment: &backend-environment
+    # Generate a URL-safe password as described in docs/operations.md.
+    BACKEND_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-vision_shield}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-vision_shield}
+
+services:
+  postgres:
+    image: postgres:18-alpine@sha256:1018733457011bf88d81db98cf43aac6d5150afc18787dbe204771fedf80ff95
+    cpus: 0.5
+    mem_limit: 1536m
+    memswap_limit: 1536m
+    pids_limit: 256
+    logging: *logging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vision_shield}
+      POSTGRES_USER: ${POSTGRES_USER:-vision_shield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine@sha256:77ca2ba3621a95208918e6e331199a6c81129690bf7fc570dc61b6e64726840a
+    hostname: rabbitmq
+    cpus: 0.5
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 256
+    logging: *logging
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-vision_shield}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 2:2 +SDcpu 1 +SDio 1"
+      RABBITMQ_CTL_ERL_ARGS: "+S 1:1 +SDcpu 1 +SDio 1"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    configs:
+      - source: rabbitmq-resources
+        target: /etc/rabbitmq/conf.d/20-resources.conf
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, check_running]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+
+  max-emulator:
+    image: vision-shield-max-emulator:local
+    build:
+      context: .
+      target: max-emulator
+    init: true
+    # Extra mock-only budget; the capacity plan assumes an external MAX API.
+    cpus: 0.5
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 128
+    logging: *logging
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      MAX_EMULATOR_TOKEN: ${MAX_EMULATOR_TOKEN:?Set MAX_EMULATOR_TOKEN in .env}
+    ports:
+      - "127.0.0.1:${MAX_EMULATOR_PORT:-8081}:8080"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import os, urllib.request;
+          urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8080/me',
+          headers={'Authorization': os.environ['MAX_EMULATOR_TOKEN']}), timeout=3).close()
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  migrate:
+    <<: *backend
+    mem_limit: 256m
+    memswap_limit: 256m
+    command: [alembic, -c, apps/backend/alembic.ini, upgrade, head]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    <<: *backend
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).close()
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  bot:
+    <<: *backend
+    cpus: 0.5
+    command: [python, apps/backend/run_inbox_bot.py]
+    stop_signal: SIGINT
+    stop_grace_period: 30s
+    environment:
+      <<: *backend-environment
+      MAX_MODE: mock
+      MAX_API_BASE_URL: http://max-emulator:8080
+      MAX_EMULATOR_TOKEN: ${MAX_EMULATOR_TOKEN:?Set MAX_EMULATOR_TOKEN in .env}
+      MAX_SOURCE_ID: ${MAX_SOURCE_ID:-mock-local}
+      BACKEND_CAMPAIGN_ID: ${BACKEND_CAMPAIGN_ID:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      max-emulator:
+        condition: service_healthy
+    # One consumer per source. Do not scale or auto-restart the in-memory emulator.
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
+
+configs:
+  rabbitmq-resources:
+    file: ./infra/rabbitmq/20-resources.conf

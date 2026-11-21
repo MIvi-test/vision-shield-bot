@@ -1,0 +1,13 @@
+**
+!Dockerfile
+!pyproject.toml
+!uv.lock
+!apps/
+!apps/backend/
+!apps/backend/**
+!apps/max-emulator/
+!apps/max-emulator/**
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*

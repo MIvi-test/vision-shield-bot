@@ -6,6 +6,11 @@ Backend обновляем соответствующие разделы это�
 
 Подробные команды настройки и запуска: [README](README.md).
 Состояние задачи и ограничения: [S1-06](../../docs/results/s1-06-progress.md).
+Контейнерный запуск существующих точек входа: корневой
+[compose.yaml](../../compose.yaml), цели `backend`/`max-emulator` в
+[Dockerfile](../../Dockerfile) и [инструкция](../../docs/operations.md#локальный-compose-s1-03).
+Сервис `migrate` применяет миграции до `backend` и `bot`; Compose передаёт
+внутренний `BACKEND_DATABASE_URL` из `POSTGRES_*`, не читая его из `.env` целиком.
 
 ## 1. Общая картина
 

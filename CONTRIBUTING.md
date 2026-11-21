@@ -13,7 +13,7 @@ Dev1 выполнил S1-02: реализованы проверки Python, с�
 ## Проверки CI
 
 Workflow `.github/workflows/ci.yml` запускается на каждый push и PR,
-а также вручную. Имена проверок: `Python checks` и `Frontend build`.
+а также вручную. Имена проверок: `Python checks`, `Compose smoke` и `Frontend build`.
 Gitleaks работает отдельным workflow с именем проверки `Gitleaks`.
 Workflow `.github/workflows/security.yml` добавляет `Dependency audit`,
 `CodeQL (python)`, `CodeQL (actions)` и `CodeQL (javascript-typescript)`
@@ -64,6 +64,15 @@ stub и удаляет свои контейнеры, сеть и теги об�
 в одном PR. CI использует `uv sync --locked`: рассинхронизация этих файлов
 приводит к ошибке. CI поднимает PostgreSQL 18 для Backend-тестов.
 Остальные сервисы и их проверки подключаются по мере реализации.
+
+`Compose smoke` собирает Backend/эмулятор и запускает одноразовый стенд
+с PostgreSQL/RabbitMQ. Проверяется текущий сценарий согласий/заявок,
+повторы, перезапуск и сохранение БД. Локальный запуск:
+`python3 infra/scripts/smoke_compose.py`; [диагностика](docs/operations.md#автоматический-smoke-тест).
+Артефакты с результатом и скрытыми credentials в логах загружаются при
+любом исходе и хранятся 7 дней. Env-файл в артефакты не включается.
+Добавление job в workflow не меняет обязательные checks ruleset: новая
+проверка требует отдельного включения и подтверждения в GitHub (S1-19).
 
 Схема установки uv соответствует
 [официальной инструкции](https://docs.astral.sh/uv/guides/integration/github/).
