@@ -14,6 +14,11 @@
 
 ### Добавлено
 
+- S1-03/S1-11: Dockerfile панели с Node 24 и Caddy, запуск без root с read-only
+  rootfs, proxy API и будущего webhook, SPA fallback, заголовки безопасности
+  и кеширование статики. Для домена предусмотрен автоматический HTTPS.
+  Сборка и smoke контейнера включены в `Frontend build`; реальный выпуск
+  сертификата и интеграция с Compose остаются для проверки на стенде.
 - S1-11: каркас панели модератора в `apps/moderator-ui/` — React 19,
   TypeScript 7, Vite 8, oxlint; точные версии зависимостей и
   `package-lock.json`, сборка `npm run build` с проверкой типов. Экранов

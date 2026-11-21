@@ -1,0 +1,71 @@
+{
+	admin off
+	persist_config off
+	http_port 8080
+	https_port 8443
+	# Request objects may contain session cookies, webhook secrets and signed URLs.
+	# Keep runtime errors, but omit the request object; access logs are disabled.
+	log {
+		format filter {
+			wrap json
+			fields {
+				request delete
+			}
+		}
+	}
+}
+
+# Loopback-only liveness stays available in both HTTP and public HTTPS mode.
+http://127.0.0.1:8081 {
+	bind 127.0.0.1
+	respond /health/live "ok" 200
+	respond 404
+}
+
+(panel_routes) {
+	root * /srv/panel
+	handle_errors {
+		header Cache-Control no-store
+		respond "Request failed" {err.status_code}
+	}
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+		-Server
+	}
+	@backend path /api /api/* /webhook /webhook/*
+	handle @backend {
+		# Preserve path, query, Host, cookies and webhook headers.
+		reverse_proxy {$PANEL_BACKEND} {
+			header_down Cache-Control no-store
+		}
+	}
+	@asset {
+		path /assets/*
+		file {path}
+	}
+	handle @asset {
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+	# Missing chunks must return 404 instead of the SPA HTML.
+	handle /assets/* {
+		header Cache-Control no-store
+		respond 404
+	}
+	handle {
+		header Cache-Control no-store
+		try_files {path} /index.html
+		file_server
+	}
+	handle_errors {
+		header Cache-Control no-store
+		respond "Request failed" {err.status_code}
+	}
+}
+
+# A public hostname enables automatic ACME certificates and renewals.
+{$PANEL_SITE_ADDRESS} {
+	import panel_routes
+}
