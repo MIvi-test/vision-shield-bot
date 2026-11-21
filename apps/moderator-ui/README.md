@@ -23,6 +23,39 @@ Dockerfile собирает `dist/` через `npm ci` и `npm run build`, за
 Веб-сервер работает с UID/GID 10001, поддерживает read-only rootfs;
 Node и npm отсутствуют в runtime.
 
+### Запуск через Compose
+
+Из корня репозитория подготовьте `.env` по
+[инструкции стенда](../../../docs/operations.md#локальный-compose-s1-03).
+Compose требует заполненные `POSTGRES_PASSWORD` и `RABBITMQ_PASSWORD`
+даже при запуске только панели, поскольку проверяет подстановки всего файла.
+
+```bash
+docker compose up --build -d --wait moderator-ui
+docker compose logs --tail=50 moderator-ui
+docker compose stop moderator-ui
+```
+
+Панель доступна на `http://127.0.0.1:8080`; порт меняется через `PANEL_PORT`
+в `.env`. Явное указание сервиса включает его профиль `frontend` и запускает
+только панель. Без работающего Backend статика доступна, proxy возвращает 502.
+Для запуска панели с HTTP Backend и его зависимостями:
+
+```bash
+docker compose up --build -d --wait moderator-ui backend
+```
+
+Весь стенд вместе с панелью: `docker compose --profile frontend up --build -d --wait`.
+Для уже работающего стенда предпочтительна команда с конкретными сервисами,
+чтобы не пересоздавать эмулятор; ограничения его перезапуска описаны в инструкции
+стенда. Без профиля обычный `docker compose up` панель не запускает.
+Caddy обращается к `backend:8000` в общей сети Compose; адрес upstream меняется
+через `PANEL_BACKEND`. Healthcheck наследуется из Dockerfile и проверяет только Caddy.
+Это собранная статика; после изменения исходников повторите команду с `--build`.
+Для разработки с автоматическим обновлением используйте `npm run dev`.
+
+### Ручной запуск контейнера
+
 Команды из корня репозитория:
 
 ```bash
