@@ -2,6 +2,7 @@
 
 import argparse
 import getpass
+import sys
 from uuid import uuid4
 
 from backend.database import PanelAccount, database_engine
@@ -14,13 +15,23 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--username", required=True)
     parser.add_argument(
+        "--password-stdin",
+        action="store_true",
+        help="Read password from stdin for controlled provisioning",
+    )
+    parser.add_argument(
         "--role", choices=["moderator", "organizer", "admin"], default="moderator"
     )
     args = parser.parse_args()
     if not 1 <= len(args.username) <= 64:
         parser.error("Имя: 1–64 символа")
-    password = getpass.getpass("Пароль: ")
-    if len(password) < 12 or password != getpass.getpass("Повторите пароль: "):
+    password = (
+        sys.stdin.readline().rstrip("\r\n")
+        if args.password_stdin
+        else getpass.getpass("Пароль: ")
+    )
+    confirmed = args.password_stdin or password == getpass.getpass("Повторите пароль: ")
+    if len(password) < 12 or not confirmed:
         parser.error("Нужен совпадающий пароль не короче 12 символов")
     engine = database_engine()
     try:

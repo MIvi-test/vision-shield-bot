@@ -90,7 +90,7 @@ jobs:
           python-version: '3.14'
 
       - name: Build images and run disposable Compose smoke test
-        run: python infra/scripts/smoke_compose.py
+        run: python infra/scripts/smoke_compose.py --sprint-one --browser
 
       - name: Upload smoke results and redacted diagnostics
         if: ${{ always() }}

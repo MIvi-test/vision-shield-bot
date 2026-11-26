@@ -1,16 +1,24 @@
-:root {
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
-  color: #1f2430;
-  background: #ffffff;
-}
-
-body {
-  margin: 0;
-}
-
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px 16px;
-}
+:root { font-family: system-ui, sans-serif; color: #172a32; background: #f2f5f5; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 1200px; margin: auto; padding: 2rem 1rem; }
+header, .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+h1 { font-size: 1.8rem; }
+section { margin: 1.5rem 0; padding: 1.5rem; background: white; border: 1px solid #d3dfe0; border-radius: .6rem; }
+.login { max-width: 28rem; margin: 3rem auto; }
+form, label { display: grid; gap: .5rem; }
+form { gap: 1.25rem; }
+input, select, button { font: inherit; border-radius: .3rem; padding: .65rem; }
+input, select { border: 1px solid #7e969e; max-width: 100%; }
+button { color: white; background: #175c57; border: 1px solid #175c57; cursor: pointer; }
+button:disabled { opacity: .55; cursor: wait; }
+:focus-visible { outline: 3px solid #e0a13a; outline-offset: 3px; }
+.error { color: #8b2222; background: #fff0ef; padding: 1rem; border-left: 4px solid #8b2222; }
+.table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { border-bottom: 1px solid #dde5e7; padding: .85rem .5rem; }
+.link { color: #175c57; background: none; border: 0; padding: 0; text-decoration: underline; overflow-wrap: anywhere; text-align: left; }
+dt { font-weight: 650; margin-top: 1rem; }
+dd { margin: .25rem 0; overflow-wrap: anywhere; }
+li { margin-bottom: .75rem; overflow-wrap: anywhere; }
+@media (max-width: 600px) { section { padding: 1rem; } th, td { font-size: .85rem; } }

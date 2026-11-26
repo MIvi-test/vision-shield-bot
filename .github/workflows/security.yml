@@ -56,6 +56,14 @@ jobs:
         working-directory: apps/moderator-ui
         run: npm audit --audit-level=high --include=dev
 
+      - name: Verify browser acceptance lockfile
+        working-directory: infra/browser
+        run: npm ci --ignore-scripts --no-audit
+
+      - name: Audit browser acceptance dependencies
+        working-directory: infra/browser
+        run: npm audit --audit-level=high
+
   codeql:
     name: CodeQL (${{ matrix.language }})
     runs-on: ubuntu-24.04
