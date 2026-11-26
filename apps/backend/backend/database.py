@@ -33,6 +33,45 @@ class ReplyOutbox(Base):
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class PanelAccount(Base):
+    __tablename__ = "panel_accounts"
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('moderator', 'organizer', 'admin')", name="ck_panel_role"
+        ),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+
+class PanelSession(Base):
+    __tablename__ = "panel_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    account_id: Mapped[UUID] = mapped_column(
+        ForeignKey("panel_accounts.id"), nullable=False
+    )
+    csrf_token: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    revoked: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+
+class LoginThrottle(Base):
+    __tablename__ = "panel_login_throttle"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    failures: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+
 class PollingCursor(Base):
     __tablename__ = "max_polling_cursors"
     __table_args__ = (CheckConstraint("marker >= 0", name="ck_cursor_marker"),)
