@@ -218,6 +218,8 @@ def router(
                     and account.active
                 )
                 if authenticated and account is not None:
+                    if not account.password_hash.startswith("scrypt16384p5$"):
+                        account.password_hash = password_hash(data.password)
                     token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
                     old = request.cookies.get("session", "")
                     previous = (

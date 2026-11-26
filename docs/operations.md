@@ -184,7 +184,7 @@ docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -
 ### Остановка, перезапуск и данные
 
 ```bash
-docker compose stop bot
+docker compose stop bot dispatcher notifier
 docker compose start bot
 docker compose logs --tail=50 bot migrate
 ```
@@ -247,3 +247,30 @@ docker compose up -d --no-deps backend bot
 - эксплуатационные: возраст outbox, глубина очередей/DLQ, ошибки workers, длительность CV, срабатывания rate limit, операции с неизвестным исходом, CPU/RAM.
 
 Readiness CV проверяет загрузку модели. Численные цели задержки фиксируем после замеров на известных изображениях и ресурсах; результаты замеров, отказных и нагрузочных тестов сохраняем в `docs/results/`.
+
+## Первый совместный сценарий S1-16
+
+Backend, outbox/RabbitMQ и API требуют миграций до 0004; migrate выполняет их
+перед запуском. Подключите панель профилем frontend, создайте аккаунт явной
+командой create_account.py и настройте кампанию по существующим шагам.
+Дальше: фото без согласия → awaiting_consent → доставленные правила →
+/agree ВЕРСИЯ → validating → вход в панель → список → карточка и аудит.
+Ни скачивание, ни CV не имитируются: это сохранённая заявка без файлового пути.
+
+При сбросе эмулятора остановите bot, dispatcher и notifier, задайте новый
+MAX_SOURCE_ID, затем запустите все три с одинаковым источником. Не удаляйте
+том RabbitMQ при сохранённом published_at без отдельной сверки уведомлений.
+Общий бюджет Backend-процессов перераспределён, см. capacity-planning §6.
+
+Изолированная автоматическая приёмка с настоящим Chromium:
+
+```bash
+python infra/scripts/smoke_compose.py --sprint-one --browser
+```
+
+Тест сам создаёт синтетические пароли, случайные loopback-порты и отдельные
+тома. Артефакты — tmp/compose-smoke/: result.json, очищенные логи и снимки UI.
+Пароли, cookie и CSRF не записываются в отчёт; браузерные traces не собираются.
+Тест удаляет только свой проект. Команда требует Docker/Compose 2.24.4+,
+сети для сборки образов/npm и свободной памяти для временного Chromium.
+Браузер — тестовый инструмент, не постоянный сервис и не часть capacity budget.

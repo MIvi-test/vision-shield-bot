@@ -1,6 +1,7 @@
 """Build and exercise a disposable mock Compose project using only the stdlib."""
 
 import argparse
+import http.cookiejar
 import json
 import os
 import re
@@ -10,6 +11,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -28,7 +30,11 @@ def require(condition: bool, message: str) -> None:
 
 
 class ComposeSmoke:
-    def __init__(self, work: Path, artifacts: Path):
+    def __init__(
+        self, work: Path, artifacts: Path, *, panel: bool = False, browser: bool = False
+    ):
+        self.panel = panel
+        self.browser = browser
         self.project = f"vision-shield-smoke-{secrets.token_hex(6)}"
         self.artifacts = artifacts / self.project
         self.artifacts.mkdir(parents=True)
@@ -38,6 +44,8 @@ class ComposeSmoke:
             "RABBITMQ_PASSWORD": secrets.token_hex(24),
             "MAX_EMULATOR_TOKEN": secrets.token_hex(24),
         }
+        if panel:
+            self.credentials["PANEL_PASSWORD"] = secrets.token_urlsafe(24)
         self.write_environment()
         override = work / "override.yaml"
         backend_image = f"{self.project}-backend:smoke"
@@ -54,6 +62,13 @@ class ComposeSmoke:
             + f"    image: {backend_image}\n"
             + '    ports: !override ["127.0.0.1::8000"]\n'
         )
+        if panel:
+            with override.open("a") as stream:
+                stream.write(
+                    "  moderator-ui:\n"
+                    f"    image: {self.project}-panel:smoke\n"
+                    '    ports: !override ["127.0.0.1::8080"]\n'
+                )
         # Explicit files and a scrubbed environment isolate this run from .env
         # and shell exports (including COMPOSE_FILE/COMPOSE_PROJECT_NAME).
         interpolation = set(
@@ -80,6 +95,8 @@ class ComposeSmoke:
             "-p",
             self.project,
         ]
+        if panel:
+            self.command.extend(["--profile", "frontend"])
         self.emulator_url = ""
         self.http = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         self.checks: list[str] = []
@@ -101,7 +118,13 @@ class ComposeSmoke:
             "".join(f"{key}={value}\n" for key, value in values.items())
         )
 
-    def run(self, *args: str, timeout: int = 180, check: bool = True) -> str:
+    def run(
+        self,
+        *args: str,
+        timeout: int = 180,
+        check: bool = True,
+        input_text: str | None = None,
+    ) -> str:
         command = self.command + list(args)
         try:
             result = subprocess.run(
@@ -111,6 +134,7 @@ class ComposeSmoke:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
+                input=input_text,
             )
         except subprocess.TimeoutExpired as exc:
             output = "".join(
@@ -317,6 +341,142 @@ class ComposeSmoke:
         self.passed(
             "Database volume survives replacement; broker starts; bot resumes processing"
         )
+        if self.panel:
+            self.panel_acceptance()
+
+    def panel_acceptance(self) -> None:
+        self.panel_url = self.url("moderator-ui", "8080")
+        with self.env_file.open("a") as stream:
+            stream.write(
+                f"BACKEND_ALLOWED_ORIGINS={self.panel_url}\nBACKEND_COOKIE_SECURE=false\n"
+            )
+        self.run("up", "--no-build", "-d", "--no-deps", "backend")
+        self.run(
+            "exec",
+            "-T",
+            "backend",
+            "python",
+            "apps/backend/create_account.py",
+            "--username",
+            "smoke-moderator",
+            "--password-stdin",
+            input_text=self.credentials["PANEL_PASSWORD"] + "\n",
+        )
+        self.panel_http = urllib.request.build_opener(
+            urllib.request.ProxyHandler({}),
+            urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()),
+        )
+        deadline = time.monotonic() + 30
+        while True:
+            try:
+                self.panel_api("/auth/me", expected=401)
+                break
+            except OSError, SmokeError:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.5)
+        self.panel_api("/submissions", expected=401)
+        login = self.panel_api(
+            "/auth/login",
+            {
+                "username": "smoke-moderator",
+                "password": self.credentials["PANEL_PASSWORD"],
+            },
+        )
+        require(
+            self.panel_api("/auth/me") == login, "Session/CSRF did not survive reload"
+        )
+        page = self.panel_api("/submissions?limit=2")
+        require(len(page["items"]) == 2 and page["next_cursor"], "Pagination missing")
+        detail = self.panel_api("/submissions/" + page["items"][0]["id"])
+        require(
+            detail["status"] == "validating"
+            and detail["consent"]["rules_version"] == "demo-v1",
+            "Panel does not show stored consent/submission",
+        )
+        require(
+            detail["history"][0]["reason_code"] == "PHOTO_RECEIVED", "History missing"
+        )
+        self.panel_api("/auth/logout", {}, expected=403)
+        self.panel_api("/auth/logout", {}, csrf=login["csrf_token"], expected=204)
+        self.panel_api("/auth/me", expected=401)
+        self.passed(
+            "Caddy -> protected API: login, stable session, list, pagination, detail, CSRF and logout"
+        )
+        if self.browser:
+            self.browser_acceptance()
+
+    def panel_api(
+        self,
+        path: str,
+        body: dict | None = None,
+        *,
+        csrf: str | None = None,
+        expected: int = 200,
+    ) -> dict:
+        headers = {"Origin": self.panel_url, "Content-Type": "application/json"}
+        if csrf is not None:
+            headers["X-CSRF-Token"] = csrf
+        request = urllib.request.Request(
+            self.panel_url + "/api" + path,
+            data=json.dumps(body).encode() if body is not None else None,
+            headers=headers,
+        )
+        try:
+            response = self.panel_http.open(request, timeout=10)
+        except urllib.error.HTTPError as exc:
+            response = exc
+        with response:
+            require(
+                response.code == expected,
+                f"Unexpected HTTP status at {path.split('?')[0]}: {response.code}",
+            )
+            require(
+                response.headers.get("Cache-Control") == "no-store",
+                "Private response may be cached",
+            )
+            return json.load(response) if response.code != 204 else {}
+
+    def browser_acceptance(self) -> None:
+        environment = self.environment | {
+            "PANEL_URL": self.panel_url,
+            "PANEL_PASSWORD": self.credentials["PANEL_PASSWORD"],
+        }
+        command = [
+            "docker",
+            "run",
+            "--rm",
+            "--init",
+            "--network",
+            "host",
+            "--shm-size",
+            "256m",
+            "--env",
+            "PANEL_URL",
+            "--env",
+            "PANEL_PASSWORD",
+            "-v",
+            str(ROOT / "infra/browser") + ":/test:ro",
+            "-v",
+            str(self.artifacts) + ":/artifacts",
+            "mcr.microsoft.com/playwright:v1.58.2-noble@sha256:6446946a1d9fd62d9ae501312a2d76a43ee688542b21622056a372959b65d63d",
+            "sh",
+            "-c",
+            "cp -r /test /tmp/browser && cd /tmp/browser && npm ci --no-audit --no-fund && node sprint_one.cjs",
+        ]
+        result = subprocess.run(
+            command, env=environment, capture_output=True, text=True, timeout=300
+        )
+        (self.artifacts / "browser.log").write_text(
+            self.redact(result.stdout + result.stderr)
+        )
+        require(
+            result.returncode == 0,
+            "Browser acceptance failed; see redacted browser.log",
+        )
+        self.passed(
+            "Chromium: login, real submissions, detail, filter, reload, mobile layout and logout"
+        )
 
     def url(self, service: str, port: str) -> str:
         address = self.run("port", service, port)
@@ -347,10 +507,25 @@ def main() -> int:
     parser.add_argument(
         "--artifacts-dir", type=Path, default=ROOT / "tmp" / "compose-smoke"
     )
+    parser.add_argument(
+        "--sprint-one",
+        action="store_true",
+        help="Include frontend and protected API acceptance",
+    )
+    parser.add_argument(
+        "--browser",
+        action="store_true",
+        help="Also run the pinned Playwright/Chromium check",
+    )
     args = parser.parse_args()
     signal.signal(signal.SIGTERM, interrupted)
     with tempfile.TemporaryDirectory(prefix="vision-shield-smoke-") as directory:
-        smoke = ComposeSmoke(Path(directory), args.artifacts_dir.resolve())
+        smoke = ComposeSmoke(
+            Path(directory),
+            args.artifacts_dir.resolve(),
+            panel=args.sprint_one or args.browser,
+            browser=args.browser,
+        )
         error = ""
         try:
             smoke.execute()

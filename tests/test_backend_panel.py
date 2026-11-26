@@ -1,4 +1,6 @@
+import hashlib
 import secrets
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -9,10 +11,22 @@ from backend.inbox import InboxStore
 from backend.passwords import password_hash, token_hash
 from backend.submissions import register_campaign
 from fastapi.testclient import TestClient
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from test_backend_inbox import db_engine as db_engine
 from test_backend_submissions import receive
+
+
+@dataclass
+class PanelHarness:
+    client: TestClient
+    password: str = field(repr=False)
+    engine: object = field(repr=False)
+
+    def __iter__(self):
+        yield self.client
+        yield self.password
+        yield self.engine
 
 
 @pytest.fixture
@@ -32,7 +46,7 @@ def panel(db_engine):
         engine=db_engine, allowed_origins=["http://testserver"], secure_cookie=False
     )
     with TestClient(app) as client:
-        yield client, password, db_engine
+        yield PanelHarness(client, password, db_engine)
 
 
 def login(panel, **headers):
@@ -258,3 +272,19 @@ def test_not_found_and_generic_server_error(panel, monkeypatch):
     assert response.status_code == 500
     assert response.json()["code"] == "internal_error"
     assert "sensitive" not in response.text
+
+
+def test_legacy_development_hash_is_upgraded_on_successful_login(panel):
+    _, password, engine = panel
+    salt = secrets.token_hex(16)
+    digest = hashlib.scrypt(
+        password.encode(), salt=bytes.fromhex(salt), n=16384, r=8, p=1
+    ).hex()
+    with Session(engine) as session, session.begin():
+        session.execute(
+            update(PanelAccount).values(password_hash=f"scrypt16384${salt}${digest}")
+        )
+    assert login(panel).status_code == 200
+    with Session(engine) as session:
+        saved = session.scalars(select(PanelAccount)).one()
+        assert saved.password_hash.startswith("scrypt16384p5$")

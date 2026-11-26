@@ -1,3 +1,29 @@
+# Панель модератора — первый сценарий
+
+Реализованы вход, восстановление сессии через /api/auth/me, список заявок,
+фильтр статуса, курсорная подгрузка, карточка с согласием и историей и выход.
+Ошибки, пустой список и загрузка отображаются отдельно. Cookie HttpOnly,
+CSRF только в памяти; localStorage/sessionStorage для токенов не используются.
+Все запросы идут на same-origin /api через Caddy. Превью и решения — спринт 2.
+
+```bash
+docker compose --profile frontend up --build -d --wait
+docker compose exec backend python apps/backend/create_account.py --username moderator
+```
+
+Откройте http://127.0.0.1:8080. Пароль задаётся явно, вводится дважды без эха.
+Кампания и заявки создаются по apps/backend/README.md. Для другого порта задайте
+также соответствующий BACKEND_ALLOWED_ORIGINS. Public HTTPS требует Secure-cookie
+и своего точного origin; локальный HTTP-стенд не объявляется production.
+
+Проверки: npm ci, npm run lint, npm run build на Node 24.
+Lint ограничен исходниками src и vite.config.ts, а не зависимостями node_modules.
+Полный браузерный тест: python infra/scripts/smoke_compose.py --sprint-one --browser.
+
+## Исходная инфраструктура Dev4
+
+Ниже сохранена документация каркаса и Caddy из первоначального S1-11.
+
 # Панель модератора
 
 Веб-панель модератора фотоленты MAX (задача S1-11): вход, список заявок и карточка заявки. Сейчас это каркас приложения — экраны появятся на следующих этапах.

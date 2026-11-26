@@ -1,0 +1,6 @@
+{
+  "name": "vision-shield-browser-acceptance",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": { "playwright": "1.58.2" }
+}
