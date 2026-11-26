@@ -14,9 +14,10 @@ from backend.polling import create_mock_bot
 
 
 class DurablePollingBot:
-    def __init__(self, bot: Bot, store: InboxStore):
+    def __init__(self, bot: Bot, store: InboxStore, *, broker_delivery: bool = False):
         self.bot = bot
         self.store = store
+        self.broker_delivery = broker_delivery
 
     async def deliver_pending(self) -> None:
         while reply := await asyncio.to_thread(self.store.claim_reply):
@@ -35,7 +36,8 @@ class DurablePollingBot:
 
     async def poll_once(self, *, timeout: int = 20) -> int:
         # Recover committed but not yet attempted replies before receiving more.
-        await self.deliver_pending()
+        if not self.broker_delivery:
+            await self.deliver_pending()
         marker = await asyncio.to_thread(self.store.marker)
         batch = await self.bot.get_updates(
             marker=marker, timeout=timeout, types=[UpdateType.MESSAGE_CREATED]
@@ -43,7 +45,8 @@ class DurablePollingBot:
         messages = [normalize_message(raw) for raw in batch["updates"]]
         next_marker = batch["marker"]
         await asyncio.to_thread(self.store.save_batch, marker, next_marker, messages)
-        await self.deliver_pending()
+        if not self.broker_delivery:
+            await self.deliver_pending()
         return next_marker
 
 
@@ -76,7 +79,10 @@ async def run() -> None:
             "Неопределённые отправки не повторяются автоматически.",
             flush=True,
         )
-        adapter = DurablePollingBot(bot, store)
+        mode = os.getenv("BACKEND_DELIVERY_MODE", "direct")
+        if mode not in {"direct", "broker"}:
+            raise ValueError("BACKEND_DELIVERY_MODE: direct или broker")
+        adapter = DurablePollingBot(bot, store, broker_delivery=mode == "broker")
         while True:
             await adapter.poll_once()
     finally:
