@@ -285,3 +285,35 @@ docker exec vision-shield-local-pg psql -U postgres -d vision_shield -c 'SELECT 
 Эмулятор v0 предоставляет фото; документы/группы проверяются на fixtures MAX.
 Slug кампании: строчные латинские буквы, цифры и дефис, первый символ — буква
 или цифра, длина 1–64. Проверка выполняется в `register_campaign()`.
+
+## S1-17: доставка ответов
+
+Миграция 0003 добавляет reply_outbox и переносит старые pending-ответы.
+В Compose бот работает с BACKEND_DELIVERY_MODE=broker. Dispatcher читает
+outbox и публикует UUID в durable-очередь RabbitMQ с confirm/mandatory;
+notifier отправляет сохранённый ответ и подтверждает сообщение после записи
+sent/unknown. Повторы очереди не повторяют завершённую или неопределённую отправку.
+Текст, MAX-ID и токены не передаются в RabbitMQ.
+
+Для самостоятельного запуска экспортируйте BACKEND_AMQP_URL локально,
+BACKEND_DELIVERY_MODE=broker и одинаковые MAX_SOURCE_ID/адрес эмулятора
+для всех процессов. После миграций запустите в отдельных терминалах:
+
+```bash
+.venv/bin/python apps/backend/run_inbox_bot.py
+.venv/bin/python apps/backend/run_delivery.py dispatcher
+.venv/bin/python apps/backend/run_delivery.py notifier
+```
+
+При отказе брокера outbox остаётся в БД. Процессы доставки выходят с ошибкой,
+Compose перезапускает их; сохранённые уведомления продолжают доставляться.
+Не очищайте том RabbitMQ при сохранении published_at в БД: потерянная очередь
+требует ручной сверки и восстановления, автоматического пересоздания нет.
+Предыдущий standalone direct-режим сохранён как учебная проверка связи.
+Backend-процессы Compose вместе ограничены 992 МиБ, включая миграции:
+HTTP 384, bot 256, dispatcher 96, notifier 128, migrate 128 МиБ.
+
+Проверки 26 ноября: полная регрессия до дополнительного SDK-теста — 234 passed;
+набор доставки после добавления SDK-теста — 10 passed. Изолированный
+Compose-прогон с PostgreSQL/RabbitMQ/эмулятором прошёл: согласие, перезапуск,
+повтор истории и сохранность тома БД.

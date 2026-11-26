@@ -12,7 +12,8 @@ x-backend: &backend
     context: .
     target: backend
   init: true
-  # Shared 1 GiB budget: HTTP 384 MiB + bot 384 MiB + migrations 256 MiB.
+  # Backend budget: HTTP 384 + intake 256 + dispatcher 96 + notifier 128
+  # + one-shot migration 128 MiB = 992 MiB.
   # See docs/results/capacity-planning.md, section 6.
   cpus: 0.25
   mem_limit: 384m
@@ -28,6 +29,7 @@ x-backend: &backend
   environment: &backend-environment
     # Generate a URL-safe password as described in docs/operations.md.
     BACKEND_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-vision_shield}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-vision_shield}
+    BACKEND_AMQP_URL: amqp://${RABBITMQ_USER:-vision_shield}:${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}@rabbitmq:5672/%2F
 
 services:
   moderator-ui:
@@ -139,8 +141,8 @@ services:
 
   migrate:
     <<: *backend
-    mem_limit: 256m
-    memswap_limit: 256m
+    mem_limit: 128m
+    memswap_limit: 128m
     command: [alembic, -c, apps/backend/alembic.ini, upgrade, head]
     depends_on:
       postgres:
@@ -167,23 +169,58 @@ services:
 
   bot:
     <<: *backend
+    mem_limit: 256m
+    memswap_limit: 256m
     cpus: 0.5
     command: [python, apps/backend/run_inbox_bot.py]
     stop_signal: SIGINT
     stop_grace_period: 30s
-    environment:
+    environment: &bot-environment
       <<: *backend-environment
       MAX_MODE: mock
       MAX_API_BASE_URL: http://max-emulator:8080
       MAX_EMULATOR_TOKEN: ${MAX_EMULATOR_TOKEN:?Set MAX_EMULATOR_TOKEN in .env}
       MAX_SOURCE_ID: ${MAX_SOURCE_ID:-mock-local}
       BACKEND_CAMPAIGN_ID: ${BACKEND_CAMPAIGN_ID:-}
+      BACKEND_DELIVERY_MODE: broker
     depends_on:
       migrate:
         condition: service_completed_successfully
       max-emulator:
         condition: service_healthy
     # One consumer per source. Do not scale or auto-restart the in-memory emulator.
+
+  dispatcher:
+    <<: *backend
+    mem_limit: 96m
+    memswap_limit: 96m
+    command: [python, apps/backend/run_delivery.py, dispatcher]
+    restart: on-failure
+    environment: *bot-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+      max-emulator:
+        condition: service_healthy
+
+  notifier:
+    <<: *backend
+    mem_limit: 128m
+    memswap_limit: 128m
+    command: [python, apps/backend/run_delivery.py, notifier]
+    restart: on-failure
+    stop_signal: SIGINT
+    stop_grace_period: 40s
+    environment: *bot-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+      max-emulator:
+        condition: service_healthy
 
 volumes:
   panel-caddy-data:

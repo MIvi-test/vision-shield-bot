@@ -6,11 +6,11 @@ from uuid import UUID, uuid4
 
 from maxapi.enums import ChatType
 from maxapi.types import MessageCreated
-from sqlalchemy import Engine, select, update
+from sqlalchemy import Engine, select, true, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from backend.database import InboxEvent, PollingCursor
+from backend.database import InboxEvent, PollingCursor, ReplyOutbox
 from backend.replies import choose_reply
 from backend.submissions import process_message
 
@@ -145,9 +145,11 @@ class InboxStore:
                         raise RuntimeError("Запись inbox не найдена после вставки")
                     event.reply_text = process_message(session, event, self.campaign_id)
                     session.flush()
+                if event_id is not None and message.reply_text is not None:
+                    session.add(ReplyOutbox(event_id=event_id))
             cursor.marker = next_marker
 
-    def claim_reply(self) -> PendingReply | None:
+    def claim_reply(self, event_id: UUID | None = None) -> PendingReply | None:
         with Session(self.engine) as session, session.begin():
             event = session.execute(
                 select(InboxEvent)
@@ -155,6 +157,7 @@ class InboxStore:
                     InboxEvent.source_id == self.source_id,
                     InboxEvent.bot_id == self.bot_id,
                     InboxEvent.state == "pending",
+                    InboxEvent.id == event_id if event_id else true(),
                 )
                 .order_by(InboxEvent.received_at, InboxEvent.id)
                 .with_for_update(skip_locked=True)

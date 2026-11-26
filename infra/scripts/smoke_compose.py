@@ -45,7 +45,7 @@ class ComposeSmoke:
             "services:\n"
             + "".join(
                 f"  {service}:\n    image: {backend_image}\n"
-                for service in ("bot", "migrate")
+                for service in ("bot", "migrate", "dispatcher", "notifier")
             )
             + "  max-emulator:\n"
             + f"    image: {self.project}-emulator:smoke\n"

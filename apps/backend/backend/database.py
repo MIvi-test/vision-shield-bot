@@ -25,6 +25,14 @@ class Base(DeclarativeBase):
     pass
 
 
+class ReplyOutbox(Base):
+    __tablename__ = "reply_outbox"
+    event_id: Mapped[UUID] = mapped_column(
+        ForeignKey("max_inbox_events.id"), primary_key=True
+    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class PollingCursor(Base):
     __tablename__ = "max_polling_cursors"
     __table_args__ = (CheckConstraint("marker >= 0", name="ck_cursor_marker"),)

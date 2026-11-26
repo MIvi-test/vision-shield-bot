@@ -14,6 +14,10 @@
 
 ### Добавлено
 
+- S1-17 (Dev2): транзакционный outbox ответов, dispatcher с publisher confirm
+  и mandatory, notifier с ACK после сохранения результата, отдельные процессы
+  Compose и проверки с настоящим RabbitMQ. Неопределённые MAX-запросы не повторяются.
+
 - S1-03/S1-11: Dockerfile панели с Node 24 и Caddy, запуск без root с read-only
   rootfs, proxy API и будущего webhook, SPA fallback, заголовки безопасности
   и кеширование статики. Для домена предусмотрен автоматический HTTPS.
